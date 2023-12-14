@@ -1,10 +1,10 @@
 from django.db import models
 
-class Users_role(models.Model):
+class UsersRole(models.Model):
     role = models.CharField(max_length=15)
 
 class User(models.Model):
-    user_role = models.ForeignKey(Users_role, on_delete=models.CASCADE)
+    user_role = models.ForeignKey(UsersRole, on_delete=models.CASCADE)
 
     email = models.EmailField()
     password = models.CharField(max_length=64)
@@ -38,7 +38,31 @@ class Student(models.Model):
     points = models.IntegerField()
     balance = models.IntegerField()
     verified = models.BooleanField(default=False)
-    personal_photo = models.ImageField()
+    personal_photo = models.ImageField(null=True, blank=True)
+
+class PointsTransaction(models.Model):
+    student_id = models.ForeignKey(Student, on_delete=models.PROTECT)
+
+    amount = models.IntegerField()
+    transaction_date = models.DateTimeField(auto_now_add=True)
+
+class StudentBalanceTransaction(models.Model):
+    student_id = models.ForeignKey(Student, on_delete=models.PROTECT)
+
+    amount = models.IntegerField()
+    transaction_date = models.DateTimeField(auto_now_add=True)
+
+class Badge(models.Model):
+    students = models.ManyToManyField(Student, through="BadgeEarning")
+
+    badge_name = models.CharField(max_length=100)
+
+class BadgeEarning(models.Model):
+    badge = models.ForeignKey(Badge, on_delete=models.CASCADE)
+    student = models.ForeignKey(Student, on_delete=models.CASCADE)
+
+    class Meta:
+        unique_together = ('student', 'badge')
 
 class Teacher(models.Model):
     gender_choices = [("M", "Male"), ("F", "Female")]
@@ -68,6 +92,27 @@ class TeacherBalanceTransaction(models.Model):
     amount = models.PositiveIntegerField()
     transaction_date = models.DateTimeField(auto_now_add=True)
 
+class Subject(models.Model):
+    teachers = models.ManyToManyField(Teacher, through="Teaching")
+
+    subject_name = models.CharField(max_length=50)
+
+class Teaching(models.Model):
+    subject = models.ForeignKey(Subject, models.CASCADE)
+    teacher = models.ForeignKey(Teacher, models.CASCADE)
+
+    class Meta:
+        unique_together = ('subject', 'teacher')
+
+class TeacherRating(models.Model):
+    student = models.ForeignKey(Student, models.CASCADE)
+    teacher = models.ForeignKey(Teacher, models.CASCADE)
+    class Meta:
+        unique_together = ('student', 'teacher')
+        constraints = [models.CheckConstraint(check=models.Q(rating__lte=5), name="teacher_rate_lte_5")]
+        
+    rating = models.PositiveSmallIntegerField()
+
 class Assistant(models.Model):
     gender_choices = [("M", "Male"), ("F", "Female")]
     
@@ -83,10 +128,22 @@ class Assistant(models.Model):
     personal_photo = models.ImageField()
     national_ID_photo = models.ImageField()
 
-class Subject(models.Model):
-    teachers = models.ManyToManyField(Teacher)
+class AssistanceRequest(models.Model):
+    teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE)
+    assistant = models.ForeignKey(Assistant, on_delete=models.CASCADE)
 
-    subject_name = models.CharField(max_length=50)
+    message = models.TextField()
+    accepted = models.BooleanField()
+    date_sent = models.DateTimeField(auto_now_add=True)
+
+class AssistantRating(models.Model):
+    student = models.ForeignKey(Student, models.CASCADE)
+    assistant = models.ForeignKey(Assistant, models.CASCADE)
+    class Meta:
+        unique_together = ('student', 'assistant')
+        constraints = [models.CheckConstraint(check=models.Q(rating__lte=5), name="assistant_rate_lte_5")]
+        
+    rating = models.PositiveSmallIntegerField()
 
 class Course(models.Model):
     students = models.ManyToManyField(Student, through="Enrollment")
@@ -101,10 +158,48 @@ class Course(models.Model):
     creation_date = models.DateTimeField(auto_now_add=True)
     completed = models.BooleanField(default=False)
 
+class CourseRating(models.Model):
+    student = models.ForeignKey(Student, models.CASCADE)
+    course = models.ForeignKey(Course, models.CASCADE)
+    class Meta:
+        unique_together = ('student', 'course')
+        constraints = [models.CheckConstraint(check=models.Q(rating__lte=5), name="course_rate_lte_5")]
+        
+    rating = models.PositiveSmallIntegerField()
+
 class Enrollment(models.Model):
     student = models.ForeignKey(Student, on_delete=models.CASCADE)
     course = models.ForeignKey(Course, on_delete=models.PROTECT)
+    class Meta:
+        unique_together = ('student', 'course')
 
     start_date = models.DateTimeField(auto_now_add=True)
+
+class Lecture(models.Model):
+    course = models.ForeignKey(Course, on_delete=models.CASCADE)
     
+    lecture_title = models.CharField(max_length=150)
+    video_path = models.CharField(max_length=250)
+    upload_date = models.DateTimeField(auto_now_add=True)
+
+class Warnings(models.Model):
+    student = models.ForeignKey(Student, on_delete=models.CASCADE)
+    course = models.ForeignKey(Course, on_delete=models.CASCADE)
+
+    date_sent = models.DateTimeField(auto_now_add=True)
+    message = models.TextField()
+
+class Attachment(models.Model):
+    lecture = models.ForeignKey(Lecture, on_delete=models.CASCADE)
     
+    attachment_path = models.CharField(max_length=250)
+
+class Payment(models.Model):
+    teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE)
+    course = models.ForeignKey(Course, on_delete=models.CASCADE)
+    lecture = models.ForeignKey(Lecture, on_delete=models.CASCADE)
+    student = models.ForeignKey(Student, on_delete=models.CASCADE)
+
+    payment_date = models.DateTimeField(auto_now_add=True)
+    amount = models.PositiveSmallIntegerField()
+
