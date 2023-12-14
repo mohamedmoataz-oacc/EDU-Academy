@@ -147,6 +147,7 @@ class AssistantRating(models.Model):
 
 class Course(models.Model):
     students = models.ManyToManyField(Student, through="Enrollment")
+    assistants = models.ManyToManyField(Assistant, through="Assisting")
     teacher = models.ForeignKey(Teacher, on_delete=models.SET_NULL, null=True)
     subject = models.ForeignKey(Subject, on_delete=models.SET_NULL, null=True)
 
@@ -157,6 +158,14 @@ class Course(models.Model):
     thumbnail = models.ImageField()
     creation_date = models.DateTimeField(auto_now_add=True)
     completed = models.BooleanField(default=False)
+
+class Assisting(models.Model):
+    assistant = models.ForeignKey(Assistant, on_delete=models.CASCADE)
+    course = models.ForeignKey(Course, on_delete=models.CASCADE)
+    class Meta:
+        unique_together = ('assistant', 'course')
+    
+    start_date = models.DateTimeField(auto_now_add=True)
 
 class CourseRating(models.Model):
     student = models.ForeignKey(Student, models.CASCADE)
@@ -203,3 +212,99 @@ class Payment(models.Model):
     payment_date = models.DateTimeField(auto_now_add=True)
     amount = models.PositiveSmallIntegerField()
 
+class Quiz(models.Model):
+    lecture = models.ForeignKey(Lecture, on_delete=models.CASCADE)
+
+    duration_in_minutes = models.PositiveSmallIntegerField()
+    start_date = models.DateTimeField()
+
+class QuizHandIn(models.Model):
+    quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE)
+    student = models.ForeignKey(Student, on_delete=models.CASCADE)
+    assistant = models.ForeignKey(Assistant, on_delete=models.CASCADE, null=True, blank=True)
+    class Meta:
+        unique_together = ('student', 'quiz')
+
+    mark = models.PositiveSmallIntegerField()
+    is_marked = models.BooleanField(default=False)
+    hand_in = models.DateTimeField(auto_now_add=True)
+
+class QuizQuestion(models.Model):
+    quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE)
+
+    question = models.TextField()
+
+class QuizQuestionChoice(models.Model):
+    question = models.ForeignKey(QuizQuestion, models.CASCADE)
+
+    choice = models.TextField()
+    is_correct = models.BooleanField(default=False)
+
+class QuizQuestionAnswer(models.Model):
+    question = models.ForeignKey(QuizQuestion, models.CASCADE)
+    student = models.ForeignKey(Student, models.CASCADE)
+    class Meta:
+        unique_together = ('student', 'question')
+    
+    answer = models.TextField()
+
+class Assignment(models.Model):
+    lecture = models.ForeignKey(Lecture, on_delete=models.CASCADE)
+
+    upload_date = models.DateTimeField(auto_now_add=True)
+
+class AssignmentHandIn(models.Model):
+    assignment = models.ForeignKey(Assignment, on_delete=models.CASCADE)
+    student = models.ForeignKey(Student, on_delete=models.CASCADE)
+    assistant = models.ForeignKey(Assistant, on_delete=models.CASCADE, null=True, blank=True)
+    class Meta:
+        unique_together = ('student', 'assignment')
+
+    mark = models.PositiveSmallIntegerField()
+    is_marked = models.BooleanField(default=False)
+    hand_in = models.DateTimeField(auto_now_add=True)
+
+class AssignmentQuestion(models.Model):
+    assignment = models.ForeignKey(Assignment, on_delete=models.CASCADE)
+
+    question = models.TextField()
+
+class AssignmentQuestionChoice(models.Model):
+    question = models.ForeignKey(AssignmentQuestion, models.CASCADE)
+
+    choice = models.TextField()
+    is_correct = models.BooleanField(default=False)
+
+class AssignmentQuestionAnswer(models.Model):
+    question = models.ForeignKey(AssignmentQuestion, models.CASCADE)
+    student = models.ForeignKey(Student, models.CASCADE)
+    class Meta:
+        unique_together = ('student', 'question')
+    
+    answer = models.TextField()
+
+class QA(models.Model):
+    lecture = models.ForeignKey(Lecture, on_delete=models.CASCADE)
+    student = models.ForeignKey(Student, on_delete=models.CASCADE)
+
+    question = models.TextField()
+    closed = models.BooleanField(default=False)
+    question_date = models.DateTimeField(auto_now_add=True)
+
+class QAAnswer(models.Model):
+    lecture = models.ForeignKey(Lecture, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    qa = models.ForeignKey(QA, on_delete=models.CASCADE)
+    students = models.ManyToManyField(Student, through="Upvote")
+
+    answer = models.TextField()
+    upvotes = models.PositiveSmallIntegerField(default=0)
+    marked_correct = models.BooleanField(default=False)
+    answer_date = models.DateField(auto_now_add=True)
+
+class Upvote(models.Model):
+    student = models.ForeignKey(Student, on_delete=models.CASCADE)
+    answer = models.ForeignKey(QAAnswer, on_delete=models.CASCADE)
+
+    class Meta:
+        unique_together = ('student', 'answer')
