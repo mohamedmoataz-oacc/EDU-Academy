@@ -38,12 +38,14 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.messages',
 
-    'api.apps.ApiConfig'
+    'api.apps.ApiConfig',
+    'rest_framework',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -51,6 +53,8 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+CORS_ORIGIN_ALLOW_ALL = True
+LOGIN_URL = "/api/login"
 ROOT_URLCONF = 'eduAcademy.urls'
 
 TEMPLATES = [
@@ -82,10 +86,19 @@ DATABASES = {
     }
 }
 
+REST_FRAMEWORK = {
+    # Use Django's standard `django.contrib.auth` permissions,
+    # or allow read-only access for unauthenticated users.
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly',
+    ]
+}
+
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
 
+AUTH_USER_MODEL = "api.User"
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',

@@ -1,4 +1,15 @@
-from django.shortcuts import render
+from django.http import HttpResponseRedirect, HttpResponse, Http404, HttpResponseBadRequest
+from django.db.utils import IntegrityError
+
+# from rest_framework.decorators import api_view
+# from rest_framework.response import Response
+# from rest_framework.request import HttpRequest
+
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
+from django.views.decorators.csrf import ensure_csrf_cookie
+
+from .models import *
 
 # What views do we want to create
 
@@ -13,3 +24,61 @@ from django.shortcuts import render
 # 1. See all courses and be able to filter by subject and grade
 # 2. See all teachers and be able to filter by subject and grade
 # 3. Get the student's points
+
+roles_to_models = {"Teacher": Teacher, "Student": Student, "Assistant": Assistant}
+
+@ensure_csrf_cookie
+def signup(request):
+    if request.user.is_authenticated:
+        return HttpResponseRedirect("home")
+    
+    if request.method == 'GET':
+        return HttpResponse()
+    elif request.method == 'POST':
+        try:
+            User.objects.create_user(
+                username=request.POST['username'],
+                email=request.POST['email'],
+                password=request.POST['password'],
+                first_name=request.POST['first_name'],
+                last_name=request.POST['last_name'],
+                governorate=request.POST['governorate'],
+                phone_number=request.POST['phone_number'],
+                gender=request.POST['gender']
+            )
+            return HttpResponse("Sign up has been successful.")
+        except IntegrityError:
+            return HttpResponseBadRequest("Either the username or email address is already associated with an account.")
+
+@ensure_csrf_cookie
+# @api_view(['GET', 'POST'])
+def login_user(request):
+    if request.user.is_authenticated:
+        return HttpResponseRedirect("home")
+    
+    if request.method == 'POST':
+        username = request.POST["username"]
+        password = request.POST["password"]
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            login(request, user)
+
+            if len(roles_to_models.get(user.user_role.role).objects.get(pk=user.pk)) == 0:
+                return HttpResponseRedirect("complete_profile")
+            else: return HttpResponseRedirect("home")
+        else:
+            return Http404("The email or password is incorrect.")
+    elif request.method == 'GET':
+        return HttpResponse()
+    
+@login_required
+def logout_user(request):
+    logout(request)
+    return HttpResponseRedirect("login")
+
+@login_required
+def complete_profile(request): ...
+@login_required
+def view_profile(request): ...
+@login_required
+def home(request): ...
