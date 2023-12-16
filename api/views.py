@@ -1,6 +1,6 @@
-from django.http import HttpResponseRedirect, HttpResponse, Http404, HttpResponseBadRequest
+from django.http import HttpResponseRedirect, HttpResponse, Http404, HttpResponseBadRequest, JsonResponse
 from django.db.utils import IntegrityError
-
+from django.shortcuts import get_object_or_404
 # from rest_framework.decorators import api_view
 # from rest_framework.response import Response
 # from rest_framework.request import HttpRequest
@@ -78,7 +78,26 @@ def logout_user(request):
 
 @login_required
 def complete_profile(request): ...
+
+@ensure_csrf_cookie
 @login_required
-def view_profile(request): ...
+def view_profile(request, name):
+    if request.method == 'POST':
+        return HttpResponseBadRequest("only GET requests")
+    
+    user = get_object_or_404(User, username=name)
+    profile = {
+                "username" : name,
+                "first_name" : user.first_name,
+                "last_name" : user.last_name,
+                "governorate" : user.governorate,
+                "email" : user.email,
+                "date_joined" : user.date_joined,
+                "gender" : user.gender,
+                "phone_number" : user.phone_number,
+                "user_role" : user.user_role
+            }
+    return JsonResponse(profile)
+
 @login_required
 def home(request): ...
