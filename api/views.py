@@ -1,4 +1,4 @@
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, JsonResponse, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404
 from django.db.utils import IntegrityError
 from django.urls import reverse
@@ -107,6 +107,23 @@ def student_complete_profile(request): ...
 def assistant_complete_profile(request): ...
 
 @login_required
-def view_profile(request): ...
+def view_profile(request, name):
+    if request.method == 'POST':
+        return HttpResponseBadRequest("only GET requests")
+    
+    user = get_object_or_404(User, username=name)
+    profile = {
+                "username" : name,
+                "first_name" : user.first_name,
+                "last_name" : user.last_name,
+                "governorate" : user.governorate,
+                "email" : user.email,
+                "date_joined" : user.date_joined,
+                "gender" : user.gender,
+                "phone_number" : user.phone_number,
+                "user_role" : user.user_role
+            }
+    return JsonResponse(profile)
+
 @login_required
 def home(request): ...
