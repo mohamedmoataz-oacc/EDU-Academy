@@ -109,7 +109,7 @@ class TeacherRating(models.Model):
     rating = models.PositiveSmallIntegerField()
 
 class Assistant(models.Model):
-    teacher = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
+    assistant = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
 
     birth_date = models.DateField()
     personal_photo = models.ImageField()
