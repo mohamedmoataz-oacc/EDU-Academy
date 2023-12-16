@@ -1,15 +1,20 @@
-from django.http import HttpResponseRedirect, HttpResponse, Http404, HttpResponseBadRequest
+from django.http import HttpResponseRedirect
+from django.shortcuts import get_object_or_404
 from django.db.utils import IntegrityError
+from django.urls import reverse
 
-# from rest_framework.decorators import api_view
-# from rest_framework.response import Response
-# from rest_framework.request import HttpRequest
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from rest_framework.exceptions import bad_request
+from rest_framework import status
 
 from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.views.decorators.csrf import ensure_csrf_cookie
 
 from .models import *
+from .views_checks import *
+from .serializers import LoginSerializer
 
 # What views do we want to create
 
@@ -25,15 +30,14 @@ from .models import *
 # 2. See all teachers and be able to filter by subject and grade
 # 3. Get the student's points
 
-roles_to_models = {"Teacher": Teacher, "Student": Student, "Assistant": Assistant}
-
 @ensure_csrf_cookie
+@api_view(['GET', 'POST'])
 def signup(request):
     if request.user.is_authenticated:
-        return HttpResponseRedirect("home")
+        return HttpResponseRedirect("home/")
     
     if request.method == 'GET':
-        return HttpResponse()
+        return Response()
     elif request.method == 'POST':
         try:
             User.objects.create_user(
@@ -46,38 +50,62 @@ def signup(request):
                 phone_number=request.POST['phone_number'],
                 gender=request.POST['gender']
             )
-            return HttpResponse("Sign up has been successful.")
+            return HttpResponseRedirect(reverse("api:login"))
         except IntegrityError:
-            return HttpResponseBadRequest("Either the username or email address is already associated with an account.")
+            return bad_request(request, "Either the username or email address is already associated with an account.")
 
 @ensure_csrf_cookie
-# @api_view(['GET', 'POST'])
+@api_view(['GET', 'POST'])
 def login_user(request):
     if request.user.is_authenticated:
-        return HttpResponseRedirect("home")
+        return HttpResponseRedirect(reverse("api:home"))
     
     if request.method == 'POST':
-        username = request.POST["username"]
-        password = request.POST["password"]
+        print("This is a post")
+        serializer = LoginSerializer(data=request.data)
+        # if serializer.is_valid(raise_exception=True):
+        #     d = serializer.data()
+        data = serializer.initial_data
+        username = data["username"]
+        password = data["password"]
+        print("Found 1")
         user = authenticate(request, username=username, password=password)
         if user is not None:
+            print("Found 2")
             login(request, user)
 
-            if len(roles_to_models.get(user.user_role.role).objects.get(pk=user.pk)) == 0:
-                return HttpResponseRedirect("complete_profile")
-            else: return HttpResponseRedirect("home")
+            if profile_is_completed(user):
+                return HttpResponseRedirect(reverse("api:home"))
+            else: return HttpResponseRedirect(reverse("api:complete_user_profile", args=(user.user_role.role,)))
         else:
-            return Http404("The email or password is incorrect.")
+            return Response(data="The username or password is incorrect.", status=status.HTTP_404_NOT_FOUND)
     elif request.method == 'GET':
-        return HttpResponse()
+        return Response()
     
 @login_required
+@api_view(['GET', 'POST'])
 def logout_user(request):
     logout(request)
-    return HttpResponseRedirect("login")
+    return HttpResponseRedirect(reverse("api:login"))
 
 @login_required
-def complete_profile(request): ...
+@api_view(['GET', 'POST'])
+def complete_profile(request):
+    roles_to_profiles = {
+        "Teacher": teacher_complete_profile,
+        "Student": student_complete_profile,
+        "Assistant": assistant_complete_profile
+    }
+
+    return roles_to_profiles[request.user.user_role.role](request)
+
+
+def teacher_complete_profile(request): ...
+
+def student_complete_profile(request): ...
+
+def assistant_complete_profile(request): ...
+
 @login_required
 def view_profile(request): ...
 @login_required
