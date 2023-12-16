@@ -38,8 +38,8 @@ class Student(models.Model):
     study_field = models.CharField(max_length=15, choices=study_field_choices, null=True, blank=True)
     parent_phone_number = models.IntegerField()
     parent_name = models.CharField(max_length=60)
-    points = models.IntegerField()
-    balance = models.IntegerField()
+    points = models.IntegerField(default=0)
+    balance = models.IntegerField(default=0)
     verified = models.BooleanField(default=False)
     personal_photo = models.ImageField(null=True, blank=True)
 
@@ -70,7 +70,7 @@ class BadgeEarning(models.Model):
 class Teacher(models.Model):
     teacher = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
 
-    balance = models.PositiveIntegerField()
+    balance = models.PositiveIntegerField(default=0)
     accepted = models.BooleanField()
     personal_photo = models.ImageField()
     national_ID_photo = models.ImageField()

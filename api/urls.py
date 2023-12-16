@@ -8,5 +8,6 @@ urlpatterns = [
     path('logout/', logout_user, name='logout'),
     path('complete_profile/', complete_profile, name='complete_profile'),
     path('home/', home, name='home'),
-    path('profile/<str:username>',view_profile, name='view_profile')
+    path('view_profile/', view_profile, name='view_profile'),
+    path('view_profile/<str:username>/', view_profile, name='view_profile'),
 ]
