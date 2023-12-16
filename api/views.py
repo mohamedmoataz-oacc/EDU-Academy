@@ -10,6 +10,7 @@ from rest_framework.exceptions import bad_request
 # return bad_request(request, "Either the username or email address is already associated with an account.")
 
 from .models import *
+from .roles_actions import *
 from .views_checks import *
 from .serializers import *
 
@@ -68,8 +69,6 @@ def login_user(request):
     
     if request.method == 'POST':
         serializer = LoginSerializer(data=request.data)
-        # if serializer.is_valid(raise_exception=True):
-        #     data = serializer.data()
         data = serializer.initial_data
         username = data["username"]
         password = data["password"]
@@ -104,80 +103,8 @@ def logout_user(request):
 def complete_profile(request):
     if profile_is_completed(request.user):
         return redirect("api:home")
-    
-    roles_to_profiles = {
-        "Teacher": teacher_complete_profile,
-        "Student": student_complete_profile,
-        "Assistant": assistant_complete_profile,
-    }
+    return roles_to_actions[request.user.user_role.role]["completion"](request)
 
-    return roles_to_profiles[request.user.user_role.role](request)
-
-# Note that `request.FILES` will only contain data if the request method was POST,
-# at least one file field was actually posted,
-# and the <form> that posted the request has the attribute enctype="multipart/form-data".
-# Otherwise, `request.FILES` will be empty.
-
-def teacher_complete_profile(request):
-    if request.method == 'GET':
-        required_data = [{
-            "required_data": ['personal_photo', 'national_ID_photo'],
-        }]
-        return Response(required_data)
-    elif request.method == 'POST':
-        serializer = TeacherProfileSerializer(data=request.data)
-        if serializer.is_valid(raise_exception=True):
-            data = serializer.data
-        
-        Teacher(
-            teacher=request.user,
-            personal_photo = data['personal_photo'],
-            national_ID_photo = data['national_ID_photo'],
-        ).save()
-        return redirect("api:view_profile", username=request.user.username)
-
-def student_complete_profile(request):
-    if request.method == 'GET':
-        required_data = [{
-            "required_data": ['birth_date', 'academic_year', 'study_field', 'parent_name',
-                              'parent_phone_number', 'personal_photo'
-                            ],
-        }]
-        return Response(required_data)
-    elif request.method == 'POST':
-        serializer = StudentProfileSerializer(data=request.data)
-        if serializer.is_valid(raise_exception=True):
-            data = serializer.data
-        
-        Student(
-            student=request.user,
-            birth_date = data['birth_date'],
-            academic_year = data['academic_year'],
-            study_field = data['study_field'] if data.get('study_field') else None,
-            parent_name = data['parent_name'],
-            parent_phone_number = data['parent_phone_number'],
-            personal_photo = data['personal_photo'] if data.get('personal_photo') else None,
-        ).save()
-        return redirect("api:view_profile", username=request.user.username)
-
-def assistant_complete_profile(request):
-    if request.method == 'GET':
-        required_data = [{
-            "required_data": ['birth_date', 'personal_photo', 'national_ID_photo'],
-        }]
-        return Response(required_data)
-    elif request.method == 'POST':
-        serializer = AssistantProfileSerializer(data=request.data)
-        if serializer.is_valid(raise_exception=True):
-            data = serializer.data
-        
-        Assistant(
-            assistant=request.user,
-            birth_date = data['birth_date'],
-            personal_photo = data['personal_photo'],
-            national_ID_photo = data['national_ID_photo'],
-        ).save()
-        return redirect("api:view_profile", username=request.user.username)
 
 ###################
 # Profile viewing #
@@ -191,11 +118,6 @@ def view_profile(request, username=None):
         return redirect("api:view_profile", username=request.user.username)
     user = get_object_or_404(User, username=username)
 
-    roles_to_profiles = {
-        "Teacher": teacher_view_profile,
-        "Student": student_view_profile,
-        "Assistant": assistant_view_profile
-    }
     profile = {
         "view_self": request.user == user, # indicates whether the user searches for himself or another
         "username" : username,
@@ -208,52 +130,8 @@ def view_profile(request, username=None):
         "phone_number" : user.phone_number,
         "user_role" : user.user_role.role
     }
-    return roles_to_profiles[user.user_role.role](user, profile)
+    return roles_to_actions[user.user_role.role]["viewing"](user, profile)
 
-def teacher_view_profile(user, user_profile: dict):
-    teacher = Teacher.objects.get(teacher=user)
-    photo_data = teacher.personal_photo.read() if teacher.personal_photo else None
-    national_photo_data = teacher.national_ID_photo.read() if teacher.national_ID_photo else None
-    user_profile.update(
-        {
-            "balance" : teacher.balance,
-            "accepted" : teacher.accepted,
-            "personal_photo" : base64.b64encode(photo_data).decode("utf-8") if photo_data else None,
-            "national_ID_photo" : base64.b64encode(national_photo_data).decode("utf-8") if national_photo_data else None,
-        }
-    )
-    return Response(user_profile)
-    
-def student_view_profile(user, user_profile: dict):
-    student = Student.objects.get(student=user)
-    photo_data = student.personal_photo.read() if student.personal_photo else None
-    user_profile.update(
-        {
-            "birth_date" : student.birth_date,
-            "academic_year" : student.academic_year,
-            "study_field" : student.study_field,
-            "parent_phone_number" : student.parent_phone_number,
-            "parent_name" : student.parent_name,
-            "points" : student.points,
-            "balance" : student.balance,
-            "verified" : student.verified,
-            "personal_photo" : base64.b64encode(photo_data).decode("utf-8") if photo_data else None 
-        }
-    )
-    return Response(user_profile)
-
-def assistant_view_profile(user, user_profile: dict):
-    assistant = Assistant.objects.get(assistant=user)
-    personal_photo_data = assistant.personal_photo.read() if assistant.personal_photo else None
-    national_photo_data = assistant.national_ID_photo.read() if assistant.national_ID_photo else None
-    user_profile.update(
-        {
-            "birth_date" : assistant.birth_date,
-            "personal_photo" : base64.b64encode(personal_photo_data).decode("utf-8") if personal_photo_data else None,
-            "national_ID_photo" : base64.b64encode(national_photo_data).decode("utf-8") if national_photo_data else None
-        }
-    )
-    return Response(user_profile)
 
 #############
 # Home page #
@@ -263,4 +141,5 @@ def assistant_view_profile(user, user_profile: dict):
 @api_view(['GET'])
 @user_passes_test(profile_is_completed, login_url="/api/complete_profile/")
 def home(request):
-    return Response("Home Page")
+    user = request.user
+    return roles_to_actions[user.user_role.role]["home"](user)
