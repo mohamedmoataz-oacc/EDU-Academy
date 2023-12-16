@@ -1,11 +1,11 @@
 from django.http import HttpResponseRedirect, JsonResponse, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404
-from django.db.utils import IntegrityError
 from django.urls import reverse
 
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.exceptions import bad_request
+# return bad_request(request, "Either the username or email address is already associated with an account.")
 from rest_framework import status
 
 from django.contrib.auth import authenticate, login, logout
@@ -14,7 +14,7 @@ from django.views.decorators.csrf import ensure_csrf_cookie
 
 from .models import *
 from .views_checks import *
-from .serializers import LoginSerializer
+from .serializers import *
 
 # What views do we want to create
 
@@ -34,26 +34,28 @@ from .serializers import LoginSerializer
 @api_view(['GET', 'POST'])
 def signup(request):
     if request.user.is_authenticated:
-        return HttpResponseRedirect("home/")
+        return HttpResponseRedirect(reverse("api:home"))
     
     if request.method == 'GET':
         return Response()
     elif request.method == 'POST':
-        try:
-            User.objects.create_user(
-                username=request.POST['username'],
-                email=request.POST['email'],
-                password=request.POST['password'],
-                first_name=request.POST['first_name'],
-                last_name=request.POST['last_name'],
-                governorate=request.POST['governorate'],
-                phone_number=request.POST['phone_number'],
-                gender=request.POST['gender']
-            )
-            return HttpResponseRedirect(reverse("api:login"))
-        except IntegrityError:
-            return bad_request(request, "Either the username or email address is already associated with an account.")
-
+        serializer = SignupSerializer(data=request.data)
+        if serializer.is_valid(raise_exception=True):
+            data = serializer.data
+        
+        User.objects.create_user(
+            username=data['username'],
+            email=data['email'],
+            password=data['password'],
+            first_name=data['first_name'],
+            last_name=data['last_name'],
+            governorate=data['governorate'],
+            phone_number=data['phone_number'],
+            gender=data['gender'],
+            user_role=UsersRole.objects.get(pk=data['user_role'])
+        )
+        return HttpResponseRedirect(reverse("api:login"))
+        
 @ensure_csrf_cookie
 @api_view(['GET', 'POST'])
 def login_user(request):
@@ -61,22 +63,19 @@ def login_user(request):
         return HttpResponseRedirect(reverse("api:home"))
     
     if request.method == 'POST':
-        print("This is a post")
         serializer = LoginSerializer(data=request.data)
         # if serializer.is_valid(raise_exception=True):
-        #     d = serializer.data()
+        #     data = serializer.data()
         data = serializer.initial_data
         username = data["username"]
         password = data["password"]
-        print("Found 1")
         user = authenticate(request, username=username, password=password)
         if user is not None:
-            print("Found 2")
             login(request, user)
 
             if profile_is_completed(user):
                 return HttpResponseRedirect(reverse("api:home"))
-            else: return HttpResponseRedirect(reverse("api:complete_user_profile", args=(user.user_role.role,)))
+            else: return HttpResponseRedirect(reverse("api:complete_profile"))
         else:
             return Response(data="The username or password is incorrect.", status=status.HTTP_404_NOT_FOUND)
     elif request.method == 'GET':

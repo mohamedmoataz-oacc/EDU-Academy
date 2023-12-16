@@ -12,4 +12,4 @@ def is_assistant(user):
     return len(Assistant.objects.filter(pk=user.pk)) == 1
 
 def profile_is_completed(user):
-    return len(roles_to_models.get(user.user_role.role).objects.filter(pk=user.pk)) == 0
+    return len(roles_to_models.get(user.user_role.role).objects.filter(pk=user.pk)) == 1

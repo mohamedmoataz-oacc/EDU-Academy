@@ -2,7 +2,7 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 
 class UsersRole(models.Model):
-    role = models.CharField(max_length=15)
+    role = models.CharField(max_length=15, unique=True)
 
 class User(AbstractUser):
     gender_choices = [("M", "Male"), ("F", "Female")]
