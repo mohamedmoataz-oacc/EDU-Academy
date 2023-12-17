@@ -2,7 +2,7 @@ from django.shortcuts import get_object_or_404, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.views.decorators.csrf import ensure_csrf_cookie
-
+  
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
@@ -197,3 +197,33 @@ def create_course(request):
 def my_courses(request):
     user = request.user
     return Response(roles_to_actions[user.user_role.role]["my_courses"](user))
+
+
+###############
+# Get courses #
+###############
+
+@api_view(['GET'])
+def get_courses(request, fields:str = ""):
+    fields = fields.split("&")
+    filters = dict()
+    for i in fields:
+        i = i.split("=")
+        if len(i) != 2: continue
+        filters[i[0]] = i[1]
+    
+    all_courses = Course.objects.all()
+    all_courses = all_courses.filter(**filters)
+    
+    filtered_courses = [
+        {
+            "name": course.course_name,
+            "description": course.description,
+            "is_completed": course.completed,
+            "teacher": User.objects.get(pk=course.teacher.pk).first_name + " " +
+                       User.objects.get(pk=course.teacher.pk).last_name,
+            # "thumbnail": course.thumbnail,
+            "subject": course.subject.subject_name,
+        } for course in all_courses
+    ]
+    return Response(filtered_courses)

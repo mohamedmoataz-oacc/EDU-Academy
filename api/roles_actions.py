@@ -144,8 +144,9 @@ def student_home(user):
             "description": course.description,
             "is_completed": course.completed,
             "teacher": User.objects.get(pk=course.teacher.pk).first_name + " " +
-                       User.objects.get(pk=course.teacher.pk).last_name
+                       User.objects.get(pk=course.teacher.pk).last_name,
             # "thumbnail": course.thumbnail,
+            "subject": course.subject.subject_name,
         } for course in courses
     ]
 
@@ -178,8 +179,9 @@ def student_my_courses(user):
             "is_completed": course.completed,
             "enrolled_date": Enrollment.objects.get(course=course, student=student).start_date.date(),
             "teacher": User.objects.get(pk=course.teacher.pk).first_name + " " +
-                       User.objects.get(pk=course.teacher.pk).last_name
+                       User.objects.get(pk=course.teacher.pk).last_name,
             # "thumbnail": course.thumbnail,
+            "subject": course.subject.subject_name,
         } for course in courses
     ]
     return output
