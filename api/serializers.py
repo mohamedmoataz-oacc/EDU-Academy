@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import User, Teacher, Student, Assistant
+from .models import User, Teacher, Student, Assistant, Course
 
 class LoginSerializer(serializers.ModelSerializer):
     class Meta:
@@ -28,3 +28,10 @@ class StudentProfileSerializer(serializers.ModelSerializer):
         fields = ('birth_date', 'academic_year', 'study_field', 'parent_name',
                   'parent_phone_number', 'personal_photo'
             )
+
+class CourseCreationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Course
+        fields = ('subject', 'course_name', 'description', 'lecture_price',
+                  'package_size', 'thumbnail'
+        )

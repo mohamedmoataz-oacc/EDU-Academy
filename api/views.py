@@ -14,8 +14,6 @@ from .roles_actions import *
 from .views_checks import *
 from .serializers import *
 
-import base64
-
 # Other functionalities:
 # 1. See all courses and be able to filter by subject and grade
 # 2. See all teachers and be able to filter by subject and grade
@@ -143,3 +141,35 @@ def view_profile(request, username=None):
 def home(request):
     user = request.user
     return roles_to_actions[user.user_role.role]["home"](user)
+
+########
+# course operations #
+########
+
+@login_required
+@api_view(['GET', 'POST'])
+@user_passes_test(is_teacher, login_url="/api/complete_profile/")
+@user_passes_test(profile_is_completed, login_url="/api/complete_profile/")
+def create_course(request):
+    if request.method == 'GET':
+        required_data = {
+            "required_data": [
+                'subject', 'course_name', 'description','lecture_price',
+                'package_size','thumbnail'
+            ],
+        }
+        return Response(required_data)
+    elif request.method == 'POST':
+        serializer = CourseCreationSerializer(data=request.data)
+        if serializer.is_valid(raise_exception=True):
+            data = serializer.data
+        Course.objects.create(
+            teacher=request.user,
+            subject = data['subject'],
+            course_name = data['course_name'],
+            description = data['description'],
+            lecture_price = data['lecture_price'],
+            package_size = data['package_size'],
+            thumbnail = data['thumbnail']
+        )
+        return redirect("api:home")
