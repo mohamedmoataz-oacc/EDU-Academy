@@ -13,6 +13,8 @@ import base64
 # Otherwise, `request.FILES` will be empty.
 
 
+# REMEMBER TO REMOVE PARTIAL
+
 ######################
 # Profile completion #
 ######################
@@ -24,12 +26,12 @@ def teacher_complete_profile(request):
         }]
         return Response(required_data)
     elif request.method == 'POST':
-        serializer = TeacherProfileSerializer(data=request.data)
+        serializer = TeacherProfileSerializer(data=request.data, partial=True)
         if serializer.is_valid(raise_exception=True):
             data = serializer.data
         
-        Teacher(
-            teacher=request.user,
+        Teacher.objects.create(
+            teacher = request.user,
             personal_photo = data['personal_photo'],
             national_ID_photo = data['national_ID_photo'],
         ).save()
@@ -48,7 +50,7 @@ def student_complete_profile(request):
         if serializer.is_valid(raise_exception=True):
             data = serializer.data
         
-        Student(
+        Student.objects.create(
             student=request.user,
             birth_date = data['birth_date'],
             academic_year = data['academic_year'],
@@ -70,11 +72,11 @@ def assistant_complete_profile(request):
         if serializer.is_valid(raise_exception=True):
             data = serializer.data
         
-        Assistant(
+        Assistant.objects.create(
             assistant=request.user,
             birth_date = data['birth_date'],
-            personal_photo = data['personal_photo'],
-            national_ID_photo = data['national_ID_photo'],
+            # personal_photo = data['personal_photo'],
+            # national_ID_photo = data['national_ID_photo'],
         ).save()
         return redirect("api:view_profile", username=request.user.username)
 
@@ -85,21 +87,18 @@ def assistant_complete_profile(request):
 
 def teacher_view_profile(user, user_profile: dict):
     teacher = Teacher.objects.get(teacher=user)
-    photo_data = teacher.personal_photo.read() if teacher.personal_photo else None
-    national_photo_data = teacher.national_ID_photo.read() if teacher.national_ID_photo else None
     user_profile.update(
         {
             "balance" : teacher.balance,
             "accepted" : teacher.accepted,
-            "personal_photo" : base64.b64encode(photo_data).decode("utf-8") if photo_data else None,
-            "national_ID_photo" : base64.b64encode(national_photo_data).decode("utf-8") if national_photo_data else None,
+            "personal_photo" : teacher.personal_photo,
+            "national_ID_photo" : teacher.national_ID_photo,
         }
     )
     return Response(user_profile)
     
 def student_view_profile(user, user_profile: dict):
     student = Student.objects.get(student=user)
-    photo_data = student.personal_photo.read() if student.personal_photo else None
     user_profile.update(
         {
             "birth_date" : student.birth_date,
@@ -110,36 +109,84 @@ def student_view_profile(user, user_profile: dict):
             "points" : student.points,
             "balance" : student.balance,
             "verified" : student.verified,
-            "personal_photo" : base64.b64encode(photo_data).decode("utf-8") if photo_data else None 
+            "personal_photo" : student.personal_photo
         }
     )
     return Response(user_profile)
 
 def assistant_view_profile(user, user_profile: dict):
     assistant = Assistant.objects.get(assistant=user)
-    personal_photo_data = assistant.personal_photo.read() if assistant.personal_photo else None
-    national_photo_data = assistant.national_ID_photo.read() if assistant.national_ID_photo else None
     user_profile.update(
         {
             "birth_date" : assistant.birth_date,
-            "personal_photo" : base64.b64encode(personal_photo_data).decode("utf-8") if personal_photo_data else None,
-            "national_ID_photo" : base64.b64encode(national_photo_data).decode("utf-8") if national_photo_data else None
+            "personal_photo" : assistant.personal_photo,
+            "national_ID_photo" : assistant.national_ID_photo,
         }
     )
     return Response(user_profile)
 
+
 ########
 # Home #
 ########
+
 def teacher_home(user):
     return Response("Home Page")
 
 def student_home(user):
-    return Response("Home Page")
+    enrolled_courses = student_my_courses(user)
+    student = Student.objects.get(student=user)
+    courses = Course.objects.all().difference(student.course_set.all())[:20]
+
+    not_enrolled_courses = [
+        {
+            "name": course.course_name,
+            "description": course.description,
+            "is_completed": course.completed,
+            "teacher": User.objects.get(pk=course.teacher.pk).first_name + " " +
+                       User.objects.get(pk=course.teacher.pk).last_name
+            # "thumbnail": course.thumbnail,
+        } for course in courses
+    ]
+
+    output = {
+        "enrolled_courses": enrolled_courses,
+        "not_enrolled_courses": not_enrolled_courses,
+    }
+
+    return Response(output)
 
 def assistant_home(user):
     return Response("Home Page")
 
+
+##############
+# My courses #
+##############
+
+def teacher_my_courses(user):
+    output = []
+    return output
+
+def student_my_courses(user):
+    student = Student.objects.get(student=user)
+    courses = student.course_set.all()
+    output = [
+        {
+            "name": course.course_name,
+            "description": course.description,
+            "is_completed": course.completed,
+            "enrolled_date": Enrollment.objects.get(course=course, student=student).start_date.date(),
+            "teacher": User.objects.get(pk=course.teacher.pk).first_name + " " +
+                       User.objects.get(pk=course.teacher.pk).last_name
+            # "thumbnail": course.thumbnail,
+        } for course in courses
+    ]
+    return output
+
+def assistant_my_courses(user):
+    output = []
+    return output
 
 ####################
 # Roles -> actions #
@@ -150,15 +197,18 @@ roles_to_actions = {
         "completion": teacher_complete_profile,
         "viewing": teacher_view_profile,
         "home": teacher_home,
+        "my_courses": teacher_my_courses,
     },
     "Student": {
         "completion": student_complete_profile,
         "viewing": student_view_profile,
         "home": student_home,
+        "my_courses": student_my_courses,
     },
     "Assistant": {
         "completion": assistant_complete_profile,
         "viewing": assistant_view_profile,
         "home": assistant_home,
+        "my_courses": assistant_my_courses,
     },
 }
