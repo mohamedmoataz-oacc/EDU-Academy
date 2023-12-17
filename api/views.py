@@ -19,6 +19,15 @@ from .serializers import *
 # 2. See all teachers and be able to filter by subject and grade
 # 3. Get the student's points
 
+#######################
+# CSRF token endpoint #
+#######################
+
+@ensure_csrf_cookie
+@api_view(['GET'])
+def get_csrf_token(request):
+    return Response()
+
 ###########
 # Sign up #
 ###########
@@ -67,7 +76,8 @@ def login_user(request):
     
     if request.method == 'POST':
         serializer = LoginSerializer(data=request.data)
-        data = serializer.initial_data
+        if serializer.is_valid(raise_exception=True):
+            data = serializer.data
         username = data["username"]
         password = data["password"]
         user = authenticate(request, username=username, password=password)
@@ -142,14 +152,14 @@ def home(request):
     user = request.user
     return roles_to_actions[user.user_role.role]["home"](user)
 
-########
+#####################
 # course operations #
-########
+#####################
 
 @login_required
 @api_view(['GET', 'POST'])
-@user_passes_test(is_teacher, login_url="/api/complete_profile/")
-@user_passes_test(profile_is_completed, login_url="/api/complete_profile/")
+@user_passes_test(is_teacher, login_url="/api/my_courses/", redirect_field_name=None)
+# @user_passes_test(profile_is_completed, login_url="/api/complete_profile/")
 def create_course(request):
     if request.method == 'GET':
         required_data = {
@@ -164,8 +174,8 @@ def create_course(request):
         if serializer.is_valid(raise_exception=True):
             data = serializer.data
         Course.objects.create(
-            teacher=request.user,
-            subject = data['subject'],
+            teacher = request.user,
+            subject = Subject.objects.get(pk=data['subject']),
             course_name = data['course_name'],
             description = data['description'],
             lecture_price = data['lecture_price'],
@@ -173,3 +183,8 @@ def create_course(request):
             thumbnail = data['thumbnail']
         )
         return redirect("api:home")
+
+@login_required
+@api_view(['GET'])
+@user_passes_test(profile_is_completed, login_url="/api/complete_profile/")
+def my_courses(request): ...
