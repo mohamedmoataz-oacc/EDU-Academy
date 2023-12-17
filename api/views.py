@@ -205,12 +205,17 @@ def my_courses(request):
 
 @api_view(['GET'])
 def get_courses(request, fields:str = ""):
+    fields_to_filters = {
+        "subject": "subject__subject_name",
+        "teacher": "teacher__teacher__username",
+        "completed": "completed",
+    }
     fields = fields.split("&")
     filters = dict()
     for i in fields:
         i = i.split("=")
-        if len(i) != 2: continue
-        filters[i[0]] = i[1]
+        if len(i) != 2 or i[0] not in fields_to_filters: continue
+        filters[fields_to_filters[i[0]]] = i[1]
     
     all_courses = Course.objects.all()
     all_courses = all_courses.filter(**filters)

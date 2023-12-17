@@ -175,7 +175,7 @@ class Lecture(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
     
     lecture_title = models.CharField(max_length=150)
-    video_path = models.CharField(max_length=250)
+    video = models.FileField(null=True, max_length=250)
     upload_date = models.DateTimeField(auto_now_add=True)
 
 class Warnings(models.Model):
@@ -188,7 +188,7 @@ class Warnings(models.Model):
 class Attachment(models.Model):
     lecture = models.ForeignKey(Lecture, on_delete=models.CASCADE)
     
-    attachment_path = models.CharField(max_length=250)
+    attachment = models.FileField(null=True, max_length=250)
 
 class Payment(models.Model):
     teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE)

@@ -166,7 +166,18 @@ def assistant_home(user):
 ##############
 
 def teacher_my_courses(user):
-    output = []
+    teacher = Teacher.objects.get(teacher=user)
+    courses = teacher.course_set.all()
+    output = [
+        {
+            "name": course.course_name,
+            "description": course.description,
+            "is_completed": course.completed,
+            "creation_date": course.creation_date.date(),
+            # "thumbnail": course.thumbnail,
+            "subject": course.subject.subject_name,
+        } for course in courses
+    ]
     return output
 
 def student_my_courses(user):
@@ -187,7 +198,20 @@ def student_my_courses(user):
     return output
 
 def assistant_my_courses(user):
-    output = []
+    assistant = Assistant.objects.get(assistant=user)
+    courses = assistant.course_set.all()
+    output = [
+        {
+            "name": course.course_name,
+            "description": course.description,
+            "is_completed": course.completed,
+            "assisting_date": Assisting.objects.get(course=course, assistant=assistant).start_date.date(),
+            "teacher": User.objects.get(pk=course.teacher.pk).first_name + " " +
+                       User.objects.get(pk=course.teacher.pk).last_name,
+            # "thumbnail": course.thumbnail,
+            "subject": course.subject.subject_name,
+        } for course in courses
+    ]
     return output
 
 ####################
