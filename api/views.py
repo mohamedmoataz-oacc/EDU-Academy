@@ -156,10 +156,12 @@ def home(request):
 # course operations #
 #####################
 
+# REMEMBER TO REMOVE PARTIAL
+
 @login_required
 @api_view(['GET', 'POST'])
+@user_passes_test(profile_is_completed, login_url="/api/complete_profile/")
 @user_passes_test(is_teacher, login_url="/api/my_courses/", redirect_field_name=None)
-# @user_passes_test(profile_is_completed, login_url="/api/complete_profile/")
 def create_course(request):
     if request.method == 'GET':
         required_data = {
@@ -170,21 +172,28 @@ def create_course(request):
         }
         return Response(required_data)
     elif request.method == 'POST':
-        serializer = CourseCreationSerializer(data=request.data)
+        serializer = CourseCreationSerializer(data=request.data, partial=True)
         if serializer.is_valid(raise_exception=True):
             data = serializer.data
         Course.objects.create(
-            teacher = request.user,
+            teacher = Teacher.objects.get(teacher=request.user),
             subject = Subject.objects.get(pk=data['subject']),
             course_name = data['course_name'],
             description = data['description'],
             lecture_price = data['lecture_price'],
             package_size = data['package_size'],
-            thumbnail = data['thumbnail']
+            # thumbnail = data['thumbnail']
         )
         return redirect("api:home")
+
+
+##############
+# My courses #
+##############
 
 @login_required
 @api_view(['GET'])
 @user_passes_test(profile_is_completed, login_url="/api/complete_profile/")
-def my_courses(request): ...
+def my_courses(request):
+    user = request.user
+    return Response(roles_to_actions[user.user_role.role]["my_courses"](user))

@@ -71,9 +71,9 @@ class Teacher(models.Model):
     teacher = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
 
     balance = models.PositiveIntegerField(default=0)
-    accepted = models.BooleanField()
-    personal_photo = models.ImageField()
-    national_ID_photo = models.ImageField()
+    accepted = models.BooleanField(default=None, null=True, blank=True)
+    personal_photo = models.ImageField(null=True, blank=True)
+    national_ID_photo = models.ImageField(null=True, blank=True)
 
 class TeachRequest(models.Model):
     teacher = models.OneToOneField(Teacher, on_delete=models.CASCADE)
@@ -112,8 +112,8 @@ class Assistant(models.Model):
     assistant = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
 
     birth_date = models.DateField()
-    personal_photo = models.ImageField()
-    national_ID_photo = models.ImageField()
+    personal_photo = models.ImageField(null=True, blank=True)
+    national_ID_photo = models.ImageField(null=True, blank=True)
 
 class AssistanceRequest(models.Model):
     teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE)
@@ -142,7 +142,7 @@ class Course(models.Model):
     description = models.TextField()
     lecture_price = models.PositiveIntegerField()
     package_size = models.PositiveSmallIntegerField()
-    thumbnail = models.ImageField()
+    thumbnail = models.ImageField(null=True, blank=True)
     creation_date = models.DateTimeField(auto_now_add=True)
     completed = models.BooleanField(default=False)
 
