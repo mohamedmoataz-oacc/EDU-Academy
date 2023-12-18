@@ -55,6 +55,11 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+# FILE_UPLOAD_HANDLERS = [
+#     "django.core.files.uploadhandler.MemoryFileUploadHandler",
+#     "django.core.files.uploadhandler.TemporaryFileUploadHandler",
+# ]
+
 CORS_ORIGIN_ALLOW_ALL = True
 LOGIN_URL = "/api/login"
 ROOT_URLCONF = 'eduAcademy.urls'

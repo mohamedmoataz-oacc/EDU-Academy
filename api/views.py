@@ -236,13 +236,11 @@ def create_lecture(request, course_id:int = None):
 # View Lecture #
 ################
 
+@login_required
 @api_view(['GET'])
 def view_lecture(request, course_id:int, lecture_title:str):
     user = request.user
-    if user.is_authenticated:
-        return roles_to_actions[user.user_role.role]["view_lecture"](user, course_id, lecture_title)
-    else: ...
-        # return Response(get_basic_course_info(course_id)[0])
+    return roles_to_actions[user.user_role.role]["view_lecture"](user, course_id, lecture_title)
 
 
 ##############

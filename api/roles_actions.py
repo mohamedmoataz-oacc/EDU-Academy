@@ -276,6 +276,18 @@ def assistant_view_course(user, course_id):
     )
     return basic_course_info
 
+
+################
+# View Lecture #
+################
+
+def teacher_view_lecture(user, course_id, lecture_title): ...
+
+def student_view_lecture(user, course_id, lecture_title): ...
+
+def assistant_view_lecture(user, course_id, lecture_title): ...
+
+
 ####################
 # Roles -> actions #
 ####################
@@ -287,6 +299,7 @@ roles_to_actions = {
         "home": teacher_home,
         "my_courses": teacher_my_courses,
         "view_course": teacher_view_course,
+        "view_lecture": teacher_view_lecture,
     },
     "Student": {
         "completion": student_complete_profile,
@@ -294,6 +307,7 @@ roles_to_actions = {
         "home": student_home,
         "my_courses": student_my_courses,
         "view_course": student_view_course,
+        "view_lecture": student_view_lecture,
     },
     "Assistant": {
         "completion": assistant_complete_profile,
@@ -301,5 +315,6 @@ roles_to_actions = {
         "home": assistant_home,
         "my_courses": assistant_my_courses,
         "view_course": assistant_view_course,
+        "view_lecture": assistant_view_lecture,
     },
 }
