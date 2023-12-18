@@ -52,7 +52,7 @@ export const MyCourses = (myCourses, courses, data) => {
         <h1>Other courses</h1>
         <div className='st'>
             {courses.map((course, index) => (
-              <Courses
+              <Course
                 key={index}
                 course_title={course.course_title}
                 teacher={course.teacher}
