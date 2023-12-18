@@ -5,7 +5,6 @@ import { useState} from 'react';
 
 
 export const Completeprofile = (role) => {
-
     const complete_profile={
         personal_photo:null,
         National_ID_photo: null,
@@ -15,7 +14,7 @@ export const Completeprofile = (role) => {
         parent_phone_number:"",
     }
     const study_field = ['أدبي' , 'علمي علوم' ,'علمي رياضة']
-    const study_field2 = ['علمي','أدبي']
+    const study_field2 = ['أدبي', 'علمي']
 
   const [form, setForm] = useState(complete_profile);
   const [personalValid, setPersonalValid] = useState(true);
@@ -48,9 +47,7 @@ export const Completeprofile = (role) => {
 }
     else{
         setForm({ ...form, [e.target.name]: e.target.value });
-        console.log(e.target.value)
     }
-    console.log(form)
  }
 
   return (
@@ -107,11 +104,11 @@ export const Completeprofile = (role) => {
                     <select
                         name='study_field'
                         id="study_field"
-                        value={form.academic_year}
+                        value={form.study_field}
                         onChange={handleChange}
                     >
                         {study_field2.map((field, index) => (
-                        <option key={index} value={index}>
+                        <option key={index+1} value={index+1}>
                             {field}
                         </option>
                         ))}
