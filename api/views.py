@@ -260,6 +260,7 @@ def get_courses(request, fields:str = "", subset=None):
     
     filtered_courses = [
         {
+            "id": course.id,
             "name": course.course_name,
             "description": course.description,
             "is_completed": course.completed,
