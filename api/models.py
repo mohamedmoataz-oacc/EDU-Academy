@@ -172,8 +172,10 @@ class Enrollment(models.Model):
 
 class Lecture(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
-    
     lecture_title = models.CharField(max_length=150)
+    class Meta:
+        unique_together = ('lecture_title', 'course')
+        
     video = models.FileField(null=True, max_length=250)
     upload_date = models.DateTimeField(auto_now_add=True)
 

@@ -158,9 +158,9 @@ def home(request):
     user = request.user
     return roles_to_actions[user.user_role.role]["home"](user)
 
-#####################
-# course operations #
-#####################
+#################
+# Create course #
+#################
 
 # REMEMBER TO REMOVE PARTIAL
 
@@ -193,6 +193,36 @@ def create_course(request):
         )
         return redirect("api:home")
 
+################
+# View Course #
+###############
+
+@api_view(['GET'])
+def view_course(request, course_id:int):
+    user = request.user
+    return roles_to_actions[user.user_role.role]["view_course"](user, course_id)
+
+##################
+# Create lecture #
+#################
+
+@login_required
+@api_view(['GET', 'POST'])
+@user_passes_test(profile_is_completed, login_url="/api/complete_profile/")
+def create_lecture(request, course_id:int = None):
+    if not is_accepted_teacher(request.user):
+        return Response(status=status.HTTP_401_UNAUTHORIZED)
+    if not len(Course.objects.filter(teacher=request.user, pk=course_id)) == 1:
+        return Response(status=status.HTTP_401_UNAUTHORIZED)
+    if request.method == 'POST':
+        serializer = LectureCreationSerializer(data=request.data)
+        if serializer.is_valid(raise_exception=True):
+            data = serializer.data
+        Lecture.objects.create(
+            Lecture_title = data['Lecture_title'],
+            video = data['video'],
+        )    
+        return redirect("api:view_lecture")
 
 ##############
 # My courses #

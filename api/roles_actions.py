@@ -3,8 +3,11 @@ Contains functions for the actions that are different between user roles.
 """
 
 from django.shortcuts import redirect
+from django.urls import reverse
+from django.db.models import Avg
 from rest_framework.response import Response
 from .serializers import *
+from views_checks import *
 
 # Note that `request.FILES` will only contain data if the request method was POST,
 # at least one file field was actually posted,
@@ -192,6 +195,81 @@ def assistant_my_courses(user):
     ]
     return output
 
+###############
+# View course #
+###############
+
+def get_basic_course_info(course_id:int):
+    course = Course.objects.get(pk=course_id)
+    info = {
+        "course_name" : course.course_name,
+        "teacher" : {
+            f"{course.teacher.first_name} {course.teacher.last_name}" : reverse("api:view_profile",args=(course.teacher.teacher.username,))
+        },
+        "subject" : course.subject.subject_name,
+        "lectures" : [
+            {
+                "lecture_title" : lecture.lecture_title,
+                "upload_date" : lecture.upload_date
+            } for lecture in Lecture.objects.filter(course=course)
+        ],
+        "assistants" : [
+            {
+                f"{assistant.assistant.first_name} {assistant.assistant.last_name}" : reverse("api:view_profile",args=(assistant.assistant.username,))
+            } for assistant in course.assistants.all()
+        ],
+        "description" : course.description,
+        "lecture_price" : course.lecture_price,
+        "package_size" : course.package_size,
+        "thumbnail" : course.thumbnail,
+        "creation_date" : course.creation_date,
+        "completed" : course.completed,
+        "rating" : CourseRating.objects.filter(course=course).aggregate(avg_rating=Avg('rating'))['avg_rating']
+
+    }
+    return (info, course)
+
+def teacher_view_course(user, course_id):
+    basic_course_info, course = get_basic_course_info(course_id)
+    if not teacher_created_course(user, course_id):
+        return basic_course_info
+    
+    basic_course_info.update(
+        {
+            "students" : [
+                {
+                    f"{student.student.first_name} {student.student.last_name}" : reverse("api:view_profile",args=(student.student.username,))
+                } for student in course.students.all()
+            ]
+        }
+    )
+    return Response(basic_course_info)
+
+def student_view_course(user, course_id):
+    student = Student.objects.get(student=user)
+    basic_course_info, course = get_basic_course_info(course_id)    
+    if not student_enrolled_in_course(user, course_id):
+        return basic_course_info
+    basic_course_info.update(
+        {
+            "enrollment_date" :  Enrollment.objects.get(student=student, course=course).start_date,
+            "warnings_count" : Warnings.objects.filter(student=student, course=course).count()
+        }
+    )
+    return Response(basic_course_info)
+
+def assistant_view_course(user, course_id):
+    assistant = Assistant.objects.get(assistant=user)
+    basic_course_info, course = get_basic_course_info(course_id)    
+    if not assistant_assisting_in_course(user, course_id):
+        return basic_course_info
+    basic_course_info.update(
+        {
+            "start_date" :  Assisting.objects.get(assistant=assistant, course=course).start_date,
+        }
+    )
+    return Response(basic_course_info)
+
 ####################
 # Roles -> actions #
 ####################
@@ -202,17 +280,20 @@ roles_to_actions = {
         "viewing": teacher_view_profile,
         "home": teacher_home,
         "my_courses": teacher_my_courses,
+        "view_course": teacher_view_course,
     },
     "Student": {
         "completion": student_complete_profile,
         "viewing": student_view_profile,
         "home": student_home,
         "my_courses": student_my_courses,
+        "view_course": student_view_course,
     },
     "Assistant": {
         "completion": assistant_complete_profile,
         "viewing": assistant_view_profile,
         "home": assistant_home,
         "my_courses": assistant_my_courses,
+        "view_course": assistant_view_course,
     },
 }

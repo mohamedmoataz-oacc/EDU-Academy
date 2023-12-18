@@ -50,3 +50,8 @@ class CourseCreationSerializer(serializers.ModelSerializer):
         if len(subject) == 0:
             raise serializers.ValidationError("There is no such subject.")
         return subject[0].pk
+    
+class LectureCreationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Course
+        fields = ('lecture_title','video')
