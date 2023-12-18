@@ -5,7 +5,6 @@ Contains functions for the actions that are different between user roles.
 from django.shortcuts import redirect
 from rest_framework.response import Response
 from .serializers import *
-import base64
 
 # Note that `request.FILES` will only contain data if the request method was POST,
 # at least one file field was actually posted,
@@ -32,8 +31,8 @@ def teacher_complete_profile(request):
         
         Teacher.objects.create(
             teacher = request.user,
-            personal_photo = data['personal_photo'],
-            national_ID_photo = data['national_ID_photo'],
+            # personal_photo = data['personal_photo'],
+            # national_ID_photo = data['national_ID_photo'],
         ).save()
         return redirect("api:view_profile", username=request.user.username)
 
@@ -52,7 +51,6 @@ def student_complete_profile(request):
         
         Student.objects.create(
             student=request.user,
-            birth_date = data['birth_date'],
             academic_year = data['academic_year'],
             study_field = data['study_field'] if data.get('study_field') else None,
             parent_name = data['parent_name'],
@@ -68,13 +66,12 @@ def assistant_complete_profile(request):
         }]
         return Response(required_data)
     elif request.method == 'POST':
-        serializer = AssistantProfileSerializer(data=request.data)
+        serializer = AssistantProfileSerializer(data=request.data, partial=True)
         if serializer.is_valid(raise_exception=True):
             data = serializer.data
         
         Assistant.objects.create(
             assistant=request.user,
-            birth_date = data['birth_date'],
             # personal_photo = data['personal_photo'],
             # national_ID_photo = data['national_ID_photo'],
         ).save()
@@ -85,42 +82,40 @@ def assistant_complete_profile(request):
 # Profile viewing #
 ###################
 
-def teacher_view_profile(user, user_profile: dict):
+def teacher_view_profile(user, user_profile: dict, view_self):
     teacher = Teacher.objects.get(teacher=user)
     user_profile.update(
         {
-            "balance" : teacher.balance,
+            "balance" : teacher.balance if view_self else None,
             "accepted" : teacher.accepted,
             "personal_photo" : teacher.personal_photo,
-            "national_ID_photo" : teacher.national_ID_photo,
+            "national_ID_photo" : teacher.national_ID_photo if view_self else None,
         }
     )
     return Response(user_profile)
     
-def student_view_profile(user, user_profile: dict):
+def student_view_profile(user, user_profile: dict, view_self):
     student = Student.objects.get(student=user)
     user_profile.update(
         {
-            "birth_date" : student.birth_date,
             "academic_year" : student.academic_year,
             "study_field" : student.study_field,
             "parent_phone_number" : student.parent_phone_number,
             "parent_name" : student.parent_name,
-            "points" : student.points,
-            "balance" : student.balance,
-            "verified" : student.verified,
+            "points" : student.points if view_self else None,
+            "balance" : student.balance if view_self else None,
+            "verified" : student.verified if view_self else None,
             "personal_photo" : student.personal_photo
         }
     )
     return Response(user_profile)
 
-def assistant_view_profile(user, user_profile: dict):
+def assistant_view_profile(user, user_profile: dict, view_self):
     assistant = Assistant.objects.get(assistant=user)
     user_profile.update(
         {
-            "birth_date" : assistant.birth_date,
             "personal_photo" : assistant.personal_photo,
-            "national_ID_photo" : assistant.national_ID_photo,
+            "national_ID_photo" : assistant.national_ID_photo if view_self else None,
         }
     )
     return Response(user_profile)
