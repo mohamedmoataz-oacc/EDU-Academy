@@ -15,6 +15,7 @@ class User(AbstractUser):
     last_name = models.CharField(max_length=20)
     governorate = models.CharField(max_length=20)
     phone_number = models.IntegerField()
+    birth_date = models.DateField()
 
     def __str__(self):
         return f'{User.username}'
@@ -33,7 +34,6 @@ class Student(models.Model):
     
     student = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
 
-    birth_date = models.DateField()
     academic_year = models.CharField(max_length=10, choices=academic_year_choices)
     study_field = models.CharField(max_length=15, choices=study_field_choices, null=True, blank=True)
     parent_phone_number = models.IntegerField()
@@ -111,7 +111,6 @@ class TeacherRating(models.Model):
 class Assistant(models.Model):
     assistant = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
 
-    birth_date = models.DateField()
     personal_photo = models.ImageField(null=True, blank=True)
     national_ID_photo = models.ImageField(null=True, blank=True)
 

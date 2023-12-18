@@ -14,7 +14,7 @@ class SignupSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('username', 'email', 'password', 'first_name', 'last_name',
-                  'governorate', 'phone_number', 'gender', 'user_role')
+                  'governorate', 'phone_number', 'gender', 'birth_date', 'user_role')
     
     def validate_user_role(self, value):
         role = UsersRole.objects.filter(role=value)
@@ -30,16 +30,12 @@ class TeacherProfileSerializer(serializers.ModelSerializer):
 class AssistantProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Assistant
-        fields = ('birth_date',
-                #   'personal_photo', 'national_ID_photo'
-                )
+        fields = ('personal_photo', 'national_ID_photo')
 
 class StudentProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Student
-        fields = ('birth_date', 'academic_year', 'study_field', 'parent_name',
-                  'parent_phone_number', 'personal_photo'
-            )
+        fields = ('academic_year', 'study_field', 'parent_name', 'parent_phone_number', 'personal_photo')
 
 class CourseCreationSerializer(serializers.ModelSerializer):
     subject = serializers.CharField(max_length=50)

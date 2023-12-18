@@ -60,6 +60,7 @@ def signup(request):
             governorate=data['governorate'],
             phone_number=data['phone_number'],
             gender=data['gender'],
+            birth_date = data['birth_date'],
             user_role=UsersRole.objects.get(pk=data['user_role']),
         )
         return redirect("api:login")
@@ -126,19 +127,21 @@ def view_profile(request, username=None):
         return redirect("api:view_profile", username=request.user.username)
     user = get_object_or_404(User, username=username)
 
+    view_self = request.user == user
     profile = {
-        "view_self": request.user == user, # indicates whether the user searches for himself or another
+        "view_self": view_self, # indicates whether the user searches for himself or another
         "username" : username,
         "first_name" : user.first_name,
         "last_name" : user.last_name,
         "governorate" : user.governorate,
-        "email" : user.email,
+        "email" : user.email if view_self else None,
         "date_joined" : user.date_joined,
         "gender" : user.gender,
-        "phone_number" : user.phone_number,
-        "user_role" : user.user_role.role
+        "phone_number" : user.phone_number if view_self else None,
+        "birth_date" : user.birth_date,
+        "user_role" : user.user_role.role,
     }
-    return roles_to_actions[user.user_role.role]["viewing"](user, profile)
+    return roles_to_actions[user.user_role.role]["viewing"](user, profile, view_self)
 
 
 #############
