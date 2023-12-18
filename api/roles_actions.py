@@ -19,63 +19,43 @@ from .serializers import *
 ######################
 
 def teacher_complete_profile(request):
-    if request.method == 'GET':
-        required_data = [{
-            "required_data": ['personal_photo', 'national_ID_photo'],
-        }]
-        return Response(required_data)
-    elif request.method == 'POST':
-        serializer = TeacherProfileSerializer(data=request.data, partial=True)
-        if serializer.is_valid(raise_exception=True):
-            data = serializer.data
-        
-        Teacher.objects.create(
-            teacher = request.user,
-            # personal_photo = data['personal_photo'],
-            # national_ID_photo = data['national_ID_photo'],
-        ).save()
-        return redirect("api:view_profile", username=request.user.username)
+    serializer = TeacherProfileSerializer(data=request.data, partial=True)
+    if serializer.is_valid(raise_exception=True):
+        data = serializer.data
+    
+    Teacher.objects.create(
+        teacher = request.user,
+        # personal_photo = data['personal_photo'],
+        # national_ID_photo = data['national_ID_photo'],
+    ).save()
+    return redirect("api:view_profile", username=request.user.username)
 
 def student_complete_profile(request):
-    if request.method == 'GET':
-        required_data = [{
-            "required_data": ['birth_date', 'academic_year', 'study_field', 'parent_name',
-                              'parent_phone_number', 'personal_photo'
-                            ],
-        }]
-        return Response(required_data)
-    elif request.method == 'POST':
-        serializer = StudentProfileSerializer(data=request.data)
-        if serializer.is_valid(raise_exception=True):
-            data = serializer.data
-        
-        Student.objects.create(
-            student=request.user,
-            academic_year = data['academic_year'],
-            study_field = data['study_field'] if data.get('study_field') else None,
-            parent_name = data['parent_name'],
-            parent_phone_number = data['parent_phone_number'],
-            personal_photo = data['personal_photo'] if data.get('personal_photo') else None,
-        ).save()
-        return redirect("api:view_profile", username=request.user.username)
+    serializer = StudentProfileSerializer(data=request.data)
+    if serializer.is_valid(raise_exception=True):
+        data = serializer.data
+    
+    Student.objects.create(
+        student=request.user,
+        academic_year = data['academic_year'],
+        study_field = data['study_field'] if data.get('study_field') else None,
+        parent_name = data['parent_name'],
+        parent_phone_number = data['parent_phone_number'],
+        personal_photo = data['personal_photo'] if data.get('personal_photo') else None,
+    ).save()
+    return redirect("api:view_profile", username=request.user.username)
 
 def assistant_complete_profile(request):
-    if request.method == 'GET':
-        required_data = [{
-            "required_data": ['birth_date', 'personal_photo', 'national_ID_photo'],
-        }]
-        return Response(required_data)
-    elif request.method == 'POST':
-        serializer = AssistantProfileSerializer(data=request.data, partial=True)
-        if serializer.is_valid(raise_exception=True):
-            data = serializer.data
-        
-        Assistant.objects.create(
-            assistant=request.user,
-            # personal_photo = data['personal_photo'],
-            # national_ID_photo = data['national_ID_photo'],
-        ).save()
-        return redirect("api:view_profile", username=request.user.username)
+    serializer = AssistantProfileSerializer(data=request.data, partial=True)
+    if serializer.is_valid(raise_exception=True):
+        data = serializer.data
+    
+    Assistant.objects.create(
+        assistant=request.user,
+        # personal_photo = data['personal_photo'],
+        # national_ID_photo = data['national_ID_photo'],
+    ).save()
+    return redirect("api:view_profile", username=request.user.username)
 
 
 ###################

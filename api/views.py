@@ -85,8 +85,7 @@ def login_user(request):
         if user is not None:
             login(request, user)
 
-            if profile_is_completed(user):
-                return redirect("api:home")
+            if profile_is_completed(user): return redirect("api:home")
             else: return redirect("api:complete_profile")
         else:
             return Response(data="The username or password is incorrect.", status=status.HTTP_404_NOT_FOUND)
@@ -112,7 +111,11 @@ def logout_user(request):
 def complete_profile(request):
     if profile_is_completed(request.user):
         return redirect("api:home")
-    return roles_to_actions[request.user.user_role.role]["completion"](request)
+    
+    if request.method == 'GET':
+        return Response({"user_role": request.user.user_role.role})
+    elif request.method == 'POST':
+        return roles_to_actions[request.user.user_role.role]["completion"](request)
 
 
 ###################
