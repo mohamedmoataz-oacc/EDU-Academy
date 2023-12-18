@@ -152,6 +152,7 @@ def teacher_my_courses(user):
     courses = teacher.course_set.all()
     output = [
         {
+            "id": course.id,
             "name": course.course_name,
             "description": course.description,
             "is_completed": course.completed,
@@ -167,6 +168,7 @@ def student_my_courses(user):
     courses = student.course_set.all()
     output = [
         {
+            "id": course.id,
             "name": course.course_name,
             "description": course.description,
             "is_completed": course.completed,
@@ -184,6 +186,7 @@ def assistant_my_courses(user):
     courses = assistant.course_set.all()
     output = [
         {
+            "id": course.id,
             "name": course.course_name,
             "description": course.description,
             "is_completed": course.completed,
