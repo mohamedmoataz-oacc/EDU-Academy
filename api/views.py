@@ -211,7 +211,8 @@ def my_courses(request):
 ###############
 
 @api_view(['GET'])
-def get_courses(request, fields:str = ""):
+def get_courses(request, fields:str = "", subset=None):
+    if not subset: return redirect("api:get_portion_courses", subset=1)
     fields_to_filters = {
         "subject": "subject__subject_name",
         "teacher": "teacher__teacher__username",
@@ -225,7 +226,7 @@ def get_courses(request, fields:str = ""):
         filters[fields_to_filters[i[0]]] = i[1]
     
     all_courses = Course.objects.all()
-    all_courses = all_courses.filter(**filters)
+    all_courses = all_courses.filter(**filters)[20*(subset-1):20*subset]
     
     filtered_courses = [
         {
