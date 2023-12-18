@@ -10,7 +10,7 @@ from rest_framework.exceptions import bad_request
 # return bad_request(request, "Either the username or email address is already associated with an account.")
 
 from .models import *
-from .roles_actions import *
+from .roles_actions import roles_to_actions, get_basic_course_info
 from .views_checks import *
 from .serializers import *
 
@@ -193,18 +193,21 @@ def create_course(request):
         )
         return redirect("api:home")
 
-################
+###############
 # View Course #
 ###############
 
 @api_view(['GET'])
 def view_course(request, course_id:int):
     user = request.user
-    return roles_to_actions[user.user_role.role]["view_course"](user, course_id)
+    if user.is_authenticated:
+        return Response(roles_to_actions[user.user_role.role]["view_course"](user, course_id))
+    else:
+        return Response(get_basic_course_info(course_id)[0])
 
 ##################
 # Create lecture #
-#################
+##################
 
 @login_required
 @api_view(['GET', 'POST'])
@@ -212,17 +215,35 @@ def view_course(request, course_id:int):
 def create_lecture(request, course_id:int = None):
     if not is_accepted_teacher(request.user):
         return Response(status=status.HTTP_401_UNAUTHORIZED)
-    if not len(Course.objects.filter(teacher=request.user, pk=course_id)) == 1:
+
+    course = Course.objects.filter(teacher=Teacher.objects.get(teacher=request.user), pk=course_id)
+    if not course.count():
         return Response(status=status.HTTP_401_UNAUTHORIZED)
     if request.method == 'POST':
-        serializer = LectureCreationSerializer(data=request.data)
+        serializer = LectureCreationSerializer(data=request.data, partial=True)
         if serializer.is_valid(raise_exception=True):
             data = serializer.data
         Lecture.objects.create(
-            Lecture_title = data['Lecture_title'],
-            video = data['video'],
-        )    
-        return redirect("api:view_lecture")
+            course = course[0],
+            lecture_title = data['lecture_title'],
+            # video = data['video'],
+        )
+        return redirect("api:view_lecture", course_id=course[0].pk, lecture_title=data['lecture_title'])
+    elif request.method == 'GET': return Response()
+    
+
+################
+# View Lecture #
+################
+
+@api_view(['GET'])
+def view_lecture(request, course_id:int, lecture_title:str):
+    user = request.user
+    if user.is_authenticated:
+        return roles_to_actions[user.user_role.role]["view_lecture"](user, course_id, lecture_title)
+    else: ...
+        # return Response(get_basic_course_info(course_id)[0])
+
 
 ##############
 # My courses #

@@ -53,5 +53,5 @@ class CourseCreationSerializer(serializers.ModelSerializer):
     
 class LectureCreationSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Course
+        model = Lecture
         fields = ('lecture_title','video')

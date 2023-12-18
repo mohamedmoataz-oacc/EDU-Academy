@@ -7,7 +7,7 @@ from django.urls import reverse
 from django.db.models import Avg
 from rest_framework.response import Response
 from .serializers import *
-from views_checks import *
+from .views_checks import *
 
 # Note that `request.FILES` will only contain data if the request method was POST,
 # at least one file field was actually posted,
@@ -26,12 +26,13 @@ def teacher_complete_profile(request):
     if serializer.is_valid(raise_exception=True):
         data = serializer.data
     
-    Teacher.objects.create(
+    teacher = Teacher.objects.create(
         teacher = request.user,
         # personal_photo = data['personal_photo'],
         # national_ID_photo = data['national_ID_photo'],
-    ).save()
-    TeachRequest.objects.create(teacher=request.user).save()
+    )
+    teacher.save()
+    TeachRequest.objects.create(teacher=teacher).save()
     return redirect("api:view_profile", username=request.user.username)
 
 def student_complete_profile(request):
@@ -90,7 +91,7 @@ def student_view_profile(user, user_profile: dict, view_self):
             "points" : student.points if view_self else None,
             "balance" : student.balance if view_self else None,
             "verified" : student.verified if view_self else None,
-            "personal_photo" : student.personal_photo,
+            "personal_photo" : student.personal_photo if student.personal_photo else None,
             "badges" : [badge.badge_name for badge in badges_list]
         }
     )
@@ -204,7 +205,8 @@ def get_basic_course_info(course_id:int):
     info = {
         "course_name" : course.course_name,
         "teacher" : {
-            f"{course.teacher.first_name} {course.teacher.last_name}" : reverse("api:view_profile",args=(course.teacher.teacher.username,))
+            f"{course.teacher.teacher.first_name} {course.teacher.teacher.last_name}" : 
+                reverse("api:view_profile",args=(course.teacher.teacher.username,))
         },
         "subject" : course.subject.subject_name,
         "lectures" : [
@@ -215,17 +217,17 @@ def get_basic_course_info(course_id:int):
         ],
         "assistants" : [
             {
-                f"{assistant.assistant.first_name} {assistant.assistant.last_name}" : reverse("api:view_profile",args=(assistant.assistant.username,))
+                f"{assistant.assistant.first_name} {assistant.assistant.last_name}" :
+                    reverse("api:view_profile",args=(assistant.assistant.username,))
             } for assistant in course.assistants.all()
         ],
         "description" : course.description,
         "lecture_price" : course.lecture_price,
         "package_size" : course.package_size,
-        "thumbnail" : course.thumbnail,
+        # "thumbnail" : course.thumbnail,
         "creation_date" : course.creation_date,
         "completed" : course.completed,
         "rating" : CourseRating.objects.filter(course=course).aggregate(avg_rating=Avg('rating'))['avg_rating']
-
     }
     return (info, course)
 
@@ -238,12 +240,13 @@ def teacher_view_course(user, course_id):
         {
             "students" : [
                 {
-                    f"{student.student.first_name} {student.student.last_name}" : reverse("api:view_profile",args=(student.student.username,))
+                    f"{student.student.first_name} {student.student.last_name}" :
+                        reverse("api:view_profile",args=(student.student.username,))
                 } for student in course.students.all()
             ]
         }
     )
-    return Response(basic_course_info)
+    return basic_course_info
 
 def student_view_course(user, course_id):
     student = Student.objects.get(student=user)
@@ -256,7 +259,7 @@ def student_view_course(user, course_id):
             "warnings_count" : Warnings.objects.filter(student=student, course=course).count()
         }
     )
-    return Response(basic_course_info)
+    return basic_course_info
 
 def assistant_view_course(user, course_id):
     assistant = Assistant.objects.get(assistant=user)
@@ -268,7 +271,7 @@ def assistant_view_course(user, course_id):
             "start_date" :  Assisting.objects.get(assistant=assistant, course=course).start_date,
         }
     )
-    return Response(basic_course_info)
+    return basic_course_info
 
 ####################
 # Roles -> actions #

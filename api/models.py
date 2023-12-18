@@ -79,7 +79,7 @@ class TeachRequest(models.Model):
     teacher = models.OneToOneField(Teacher, on_delete=models.CASCADE)
 
     date_submitted = models.DateTimeField(auto_now_add=True)
-    date_reviewed = models.DateTimeField()
+    date_reviewed = models.DateTimeField(null=True, blank=True)
 
 class TeacherBalanceTransaction(models.Model):
     teacher = models.OneToOneField(Teacher, on_delete=models.CASCADE)
@@ -172,10 +172,10 @@ class Enrollment(models.Model):
 
 class Lecture(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
-    lecture_title = models.CharField(max_length=150)
     class Meta:
         unique_together = ('lecture_title', 'course')
         
+    lecture_title = models.CharField(max_length=150)
     video = models.FileField(null=True, max_length=250)
     upload_date = models.DateTimeField(auto_now_add=True)
 
