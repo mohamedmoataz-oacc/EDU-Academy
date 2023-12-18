@@ -28,6 +28,7 @@ def teacher_complete_profile(request):
         # personal_photo = data['personal_photo'],
         # national_ID_photo = data['national_ID_photo'],
     ).save()
+    TeachRequest.objects.create(teacher=request.user).save()
     return redirect("api:view_profile", username=request.user.username)
 
 def student_complete_profile(request):
