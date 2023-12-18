@@ -164,8 +164,9 @@ def home(request):
 @login_required
 @api_view(['GET', 'POST'])
 @user_passes_test(profile_is_completed, login_url="/api/complete_profile/")
-@user_passes_test(is_teacher, login_url="/api/my_courses/", redirect_field_name=None)
 def create_course(request):
+    if not is_accepted_teacher(request.user):
+        return Response(status=status.HTTP_401_UNAUTHORIZED)
     if request.method == 'GET':
         required_data = {
             "required_data": [

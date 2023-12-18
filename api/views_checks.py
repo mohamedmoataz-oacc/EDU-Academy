@@ -8,6 +8,11 @@ def is_student(user):
 def is_teacher(user):
     return len(Teacher.objects.filter(pk=user.pk)) == 1
 
+def is_accepted_teacher(user):
+    if is_teacher(user):
+        return Teacher.objects.get(pk=user.pk).accepted
+    return False
+
 def is_assistant(user):
     return len(Assistant.objects.filter(pk=user.pk)) == 1
 
