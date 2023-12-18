@@ -1,0 +1,20 @@
+{
+  "files": {
+    "main.css": "/static/css/main.dd6434e7.css",
+    "main.js": "/static/js/main.ee455643.js",
+    "static/media/QA.png": "/static/media/QA.9f27c9b81b8296acbf2a.png",
+    "static/media/books.png": "/static/media/books.f16dd91374b58b4aed49.png",
+    "static/media/quiz.png": "/static/media/quiz.8fc4ed751762ddf47bb4.png",
+    "static/media/video.png": "/static/media/video.b882fc57cba572705d17.png",
+    "static/media/green.png": "/static/media/green.f170197ba43903b97d0f.png",
+    "static/media/leaderboard.png": "/static/media/leaderboard.3cc80a56dd9a8ae0431b.png",
+    "static/media/google.png": "/static/media/google.bc37d6ebecea416adb2b.png",
+    "index.html": "/index.html",
+    "main.dd6434e7.css.map": "/static/css/main.dd6434e7.css.map",
+    "main.ee455643.js.map": "/static/js/main.ee455643.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.dd6434e7.css",
+    "static/js/main.ee455643.js"
+  ]
+}
