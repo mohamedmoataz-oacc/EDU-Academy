@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import facebook from '../Assets/facebook.png'
 import google from '../Assets/google.png'
+import axios from 'axios';
 
 
 const initialState = {
@@ -61,7 +62,15 @@ const Auth = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        window.location.reload();
+        try {
+            const response = await axios.post('/api/login/', {
+                username: form.username,
+                password: form.password,
+            });
+            console.log(response.json());
+        } catch (error) {
+            console.error('Error during login:', error);
+        }
 
     }
 
