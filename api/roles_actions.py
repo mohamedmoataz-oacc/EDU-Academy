@@ -76,6 +76,7 @@ def teacher_view_profile(user, user_profile: dict, view_self):
     
 def student_view_profile(user, user_profile: dict, view_self):
     student = Student.objects.get(student=user)
+    badges_list = student.badge_set.all()
     user_profile.update(
         {
             "academic_year" : student.academic_year,
@@ -85,7 +86,8 @@ def student_view_profile(user, user_profile: dict, view_self):
             "points" : student.points if view_self else None,
             "balance" : student.balance if view_self else None,
             "verified" : student.verified if view_self else None,
-            "personal_photo" : student.personal_photo
+            "personal_photo" : student.personal_photo,
+            "badges" : [badge.badge_name for badge in badges_list]
         }
     )
     return Response(user_profile)
