@@ -9,3 +9,4 @@
 .vscode/settings.json
 .venv
 .vscode
+db.sqlite3
