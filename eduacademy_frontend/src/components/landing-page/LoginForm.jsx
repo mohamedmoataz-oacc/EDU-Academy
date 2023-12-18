@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import facebook from '../Assets/facebook.png'
 import google from '../Assets/google.png'
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 
 const initialState = {
@@ -52,6 +53,7 @@ const governorates = [
 
 
 const Auth = () => {
+    const navigate = useNavigate();
     const [form, setForm] = useState(initialState);
     const [isSignup, setIsSignup] = useState(true);
 
@@ -80,18 +82,22 @@ const Auth = () => {
                     user_role: form.user_role,
                     birth_date: form.birth_date
 
-                }, {maxRedirects: 0 })
-                if (response) {
+                } , {maxRedirects: 0 })
+
+              
+                if (response.status === 200) {
                     alert('Message: signup sent successfully');
-                    //Route to Home or complete_profile
+                    setIsSignup(false)
                 }
-                setIsSignup(false)
+              
 
             } catch (error) {
-                if (error.response) {
+                if (error.response.status === 400 ) {
                     alert(`Message: Your information is badly formatted OR there is user with the same username OR email address PLease try again`)
+                } else if (error.response.status === 403){
+                    alert('Message: You Already Loged In');
                 } else {
-                    alert('Message: Unkown error');
+                    alert('Message: Unkown/Netwrok error');
                 }
             }
 
@@ -102,18 +108,38 @@ const Auth = () => {
                 response = await axios.post('/api/login/', {
                     username: form.username,
                     password: form.password,
-                }, { maxRedirects: 0 });
-
-                if (response) {
-                    alert('Message: Loged in successfully');
-                    //Route to Home or complete_profile
+                } , );
+                
+                
+                if (response.status === 200) {
+                    alert('Message: Logged in successfully');
+                    
+                    let route = response.request.responseURL;
+                    let user_role = response.data.user_role;
+                
+                    console.log('Route:', route);
+                
+                    if (route.includes("complete_profile")) {
+                        // Use history to navigate with query parameters
+                        navigate({
+                            pathname: '/CompleteProfile',
+                            search: `?role=${user_role}`, // Pass user_role as a query parameter
+                        });
+                    }else{
+                        navigate({
+                            pathname: '/home',
+                            search: `?role=${user_role}`, // Pass user_role as a query parameter
+                        });
+                    }
                 }
 
             } catch (error) {
-                if (error.response) {
+                if (error.response.status === 404 ) {
                     alert('Message:' + error.response.data);
-                } else {
-                    alert('Message: Unkown error');
+                } else if (error.response.status === 403) {
+                    alert('Message: You Already Loged In');
+                }else{
+                    alert('Message: Unkown/Netwrok error');
                 }
             }
 
