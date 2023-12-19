@@ -4,7 +4,9 @@ import { FiUpload } from "react-icons/fi";
 import { useState} from 'react';
 
 
-export const Completeprofile = (role) => {
+export const Completeprofile = () => {
+    const role = 'Student';
+
     const complete_profile={
         personal_photo:null,
         National_ID_photo: null,
@@ -13,6 +15,7 @@ export const Completeprofile = (role) => {
         parent_name: "",
         parent_phone_number:"",
     }
+
     const study_field = ['أدبي' , 'علمي علوم' ,'علمي رياضة']
     const study_field2 = ['أدبي', 'علمي']
 
@@ -50,10 +53,15 @@ export const Completeprofile = (role) => {
     }
  }
 
+ const handleSubmit = async (e) => {
+    e.preventDefault();
+}
+
+
   return (
     <div className="container">
         
-    <form className='complete-profile'>
+    <form className='complete-profile' onSubmit={handleSubmit}>
         <div className='header'>
             <p className='texts'>Complete Profile</p>
             <div className="underline"></div>
@@ -159,13 +167,11 @@ export const Completeprofile = (role) => {
         ):<></>
         }
         <div className="submit">
-            <button>Skip</button>
-            <button>Submit</button>
-            
+            <button type='button'>Skip</button>
+            <button type='submit'>Submit</button>
         </div>
 
     </form>
     </div>
   )
 }
-
