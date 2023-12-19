@@ -43,18 +43,6 @@ class Student(models.Model):
     verified = models.BooleanField(default=False)
     personal_photo = models.ImageField(upload_to="students/personal_photos/", null=True, blank=True)
 
-class PointsTransaction(models.Model):
-    student_id = models.ForeignKey(Student, on_delete=models.PROTECT)
-
-    amount = models.IntegerField()
-    transaction_date = models.DateTimeField(auto_now_add=True)
-
-class StudentBalanceTransaction(models.Model):
-    student_id = models.ForeignKey(Student, on_delete=models.PROTECT)
-
-    amount = models.IntegerField()
-    transaction_date = models.DateTimeField(auto_now_add=True)
-
 class Badge(models.Model):
     students = models.ManyToManyField(Student, through="BadgeEarning")
 
@@ -197,8 +185,19 @@ class Payment(models.Model):
     lecture = models.ForeignKey(Lecture, on_delete=models.CASCADE)
     student = models.ForeignKey(Student, on_delete=models.CASCADE)
 
-    payment_date = models.DateTimeField(auto_now_add=True)
-    amount = models.PositiveSmallIntegerField()
+class PointsTransaction(models.Model):
+    student = models.ForeignKey(Student, on_delete=models.PROTECT)
+    payment = models.ForeignKey(Payment, on_delete=models.PROTECT)
+
+    amount = models.IntegerField()
+    transaction_date = models.DateTimeField(auto_now_add=True)
+
+class StudentBalanceTransaction(models.Model):
+    student = models.ForeignKey(Student, on_delete=models.PROTECT)
+    payment = models.ForeignKey(Payment, on_delete=models.PROTECT)
+
+    amount = models.IntegerField()
+    transaction_date = models.DateTimeField(auto_now_add=True)
 
 class Quiz(models.Model):
     lecture = models.OneToOneField(Lecture, on_delete=models.CASCADE)

@@ -41,3 +41,9 @@ def assistant_assisting_in_course(user, course_id:int):
 def student_bought_lecture(user, lecture):
     student = Student.objects.get(student=user)
     return Payment.objects.filter(student=student, lecture=lecture).count()
+
+POINT_VALUE = 1/5
+def points_to_pounds(points:int):
+    return int(points * POINT_VALUE)
+def pounds_to_points(pounds:int):
+    return int(pounds / POINT_VALUE)

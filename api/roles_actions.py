@@ -152,7 +152,7 @@ def teacher_my_courses(user):
     courses = teacher.course_set.all()
     output = [
         {
-            "id": course.id,
+            "course_id": course.id,
             "name": course.course_name,
             "description": course.description,
             "is_completed": course.completed,
@@ -172,7 +172,7 @@ def student_my_courses(user):
     courses = student.course_set.all()
     output = [
         {
-            "id": course.id,
+            "course_id": course.id,
             "name": course.course_name,
             "description": course.description,
             "is_completed": course.completed,
@@ -194,7 +194,7 @@ def assistant_my_courses(user):
     courses = assistant.course_set.all()
     output = [
         {
-            "id": course.id,
+            "course_id": course.id,
             "name": course.course_name,
             "description": course.description,
             "is_completed": course.completed,
@@ -218,6 +218,7 @@ def assistant_my_courses(user):
 def get_basic_course_info(course_id:int):
     course = get_object_or_404(Course, pk=course_id)
     info = {
+        "course_id": course.id,
         "course_name" : course.course_name,
         "teacher" : {
             f"{course.teacher.teacher.first_name} {course.teacher.teacher.last_name}" : 
@@ -301,6 +302,7 @@ def get_lecture_content(lecture):
     assignment = Assignment.objects.filter(lecture=lecture)
     qa = QA.objects.filter(lecture=lecture)
     content = {
+        "lecture_id": lecture.id,
         "attached_files_number" : attachments_number,
         "video": f"media/{lecture.video}",
         "Quiz" : {
@@ -343,7 +345,7 @@ def teacher_view_lecture(user, lecture):
 
 def student_view_lecture(user, lecture):
     if not student_bought_lecture(user, lecture):
-        return Response(status=status.HTTP_401_UNAUTHORIZED)
+        return Response(status=status.HTTP_402_PAYMENT_REQUIRED)
     return get_lecture_content(lecture)
 
 def assistant_view_lecture(user, lecture):

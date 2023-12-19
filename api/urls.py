@@ -18,4 +18,5 @@ urlpatterns = [
     path('course/<int:course_id>/', view_course, name='view_course'),
     path('course/<int:course_id>/create_lecture/', create_lecture, name='create_lecture'),
     path('course/<int:course_id>/<str:lecture_title>/', view_lecture, name='view_lecture'),
+    path('payments/<str:lecture_id>/', pay_for_lecture, name='pay_for_lecture'),
 ]

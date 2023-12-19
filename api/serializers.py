@@ -55,3 +55,12 @@ class LectureCreationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Lecture
         fields = ('lecture_title','video')
+
+class PaymentsSerializer(serializers.ModelSerializer):
+    method = serializers.CharField(max_length=10)
+
+    def validate_method(self, value):
+        method_choices = ["balance", "points"]
+        if value not in method_choices:
+            raise serializers.ValidationError("There is no such method.")
+        return value
