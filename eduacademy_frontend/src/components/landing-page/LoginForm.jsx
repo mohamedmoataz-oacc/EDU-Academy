@@ -112,17 +112,16 @@ const Auth = () => {
 
 
                 if (response.status === 200) {
-                    alert('Message: Logged in successfully');
                     let resp_json = response.data;
-                    // debug
-                    // console.log('role:', resp_json.user_role);
-                    // console.log('url:', resp_json.redirect_to);
+
 
                     if (resp_json.redirect_to === undefined) {
+                        alert(resp_json.message)
                         navigate({
                             pathname: `/Home`
                         });
                     } else {
+                        alert(resp_json.message)
                         navigate({
                             pathname: `${resp_json.redirect_to}`,
                             search: `?role=${resp_json.user_role}`, // Pass user_role as a query parameter

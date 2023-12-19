@@ -87,11 +87,11 @@ def login_user(request):
             login(request, user)
 
             if profile_is_completed(user):
-                return Response({"message":"User logged in successfully and profile is completed",
+                return Response({"message":"User logged in successfully",
                                  "user_role": user.user_role.role})
             else:
-                return Response({"message":"User logged in successfully and profile is completed",
-                                 "redirect_to": reverse("api:complete_profile"),
+                return Response({"message":"User logged in successfully and profile is incompleted",
+                                 "redirect_to": "/CompleteProfile",
                                   "user_role": user.user_role.role})
         else:
             return Response(data="The username or password is incorrect.", status=status.HTTP_404_NOT_FOUND)
@@ -115,7 +115,7 @@ def logout_user(request):
 def complete_profile(request):
     if not request.user.is_authenticated:
         Response({"message":"User should log in first to complete his profile",
-                  "redirect_to": reverse("api:login")}, status=status.HTTP_401_UNAUTHORIZED)
+                  "redirect_to": "/Login"}, status=status.HTTP_401_UNAUTHORIZED)
     if profile_is_completed(request.user):
         return Response(data="The user's profile already completed", status=status.HTTP_403_FORBIDDEN)
     
