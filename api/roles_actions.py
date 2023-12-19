@@ -33,7 +33,7 @@ def teacher_complete_profile(request):
     )
     teacher.save()
     TeachRequest.objects.create(teacher=teacher).save()
-    return redirect("api:view_profile", username=request.user.username)
+    return Response({"user_role":request.user.user_role.role, "redirect_to":reverse("api:view_profile", args=(request.user.username,))})
 
 def student_complete_profile(request):
     serializer = StudentProfileSerializer(data=request.data)
@@ -48,7 +48,7 @@ def student_complete_profile(request):
         parent_phone_number = data['parent_phone_number'],
         personal_photo = data['personal_photo'] if data.get('personal_photo') else None,
     ).save()
-    return redirect("api:view_profile", username=request.user.username)
+    return Response({"user_role":request.user.user_role.role, "redirect_to":reverse("api:view_profile", args=(request.user.username,))})
 
 def assistant_complete_profile(request):
     serializer = AssistantProfileSerializer(data=request.data)
@@ -60,7 +60,7 @@ def assistant_complete_profile(request):
         personal_photo = data['personal_photo'],
         national_ID_photo = data['national_ID_photo'],
     ).save()
-    return redirect("api:view_profile", username=request.user.username)
+    return Response({"user_role":request.user.user_role.role, "redirect_to":reverse("api:view_profile", args=(request.user.username,))})
 
 
 ###################
@@ -161,6 +161,10 @@ def teacher_my_courses(user):
             "subject": course.subject.subject_name,
         } for course in courses
     ]
+    output = {
+        "user_role": "Teacher",
+        "courses" : output,
+    }
     return output
 
 def student_my_courses(user):
@@ -179,6 +183,10 @@ def student_my_courses(user):
             "subject": course.subject.subject_name,
         } for course in courses
     ]
+    output = {
+        "user_role": "Student",
+        "courses" : output,
+    }
     return output
 
 def assistant_my_courses(user):
@@ -197,6 +205,10 @@ def assistant_my_courses(user):
             "subject": course.subject.subject_name,
         } for course in courses
     ]
+    output = {
+        "user_role": "Student",
+        "courses" : output,
+    }
     return output
 
 ###############
@@ -249,7 +261,8 @@ def teacher_view_course(user, course_id):
             ]
         }
     )
-    return basic_course_info
+    output = {"user_role": "Teacher", "course_info": basic_course_info}
+    return output
 
 def student_view_course(user, course_id):
     student = Student.objects.get(student=user)
@@ -262,7 +275,8 @@ def student_view_course(user, course_id):
             "warnings_count" : Warnings.objects.filter(student=student, course=course).count()
         }
     )
-    return basic_course_info
+    output = {"user_role": "Student", "course_info": basic_course_info}
+    return output
 
 def assistant_view_course(user, course_id):
     assistant = Assistant.objects.get(assistant=user)
@@ -274,7 +288,8 @@ def assistant_view_course(user, course_id):
             "start_date" :  Assisting.objects.get(assistant=assistant, course=course).start_date,
         }
     )
-    return basic_course_info
+    output = {"user_role": "Assistant", "course_info": basic_course_info}
+    return output
 
 #######################
 # Get lecture content #

@@ -1,6 +1,7 @@
 from django.shortcuts import get_object_or_404, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required, user_passes_test
+from django.urls import reverse
 from django.views.decorators.csrf import ensure_csrf_cookie
   
 from rest_framework.decorators import api_view
@@ -36,7 +37,7 @@ def get_csrf_token(request):
 @api_view(['GET', 'POST'])
 def signup(request):
     if request.user.is_authenticated:
-        return redirect("api:complete_profile")
+        return Response(data="You are already logged in", status=status.HTTP_403_FORBIDDEN)
     
     if request.method == 'GET':
         required_data = {
@@ -63,7 +64,7 @@ def signup(request):
             birth_date = data['birth_date'],
             user_role=UsersRole.objects.get(pk=data['user_role']),
         )
-        return redirect("api:login")
+        return Response("Signup successful")
         
 ##################
 # Login & Logout #
@@ -73,7 +74,7 @@ def signup(request):
 @api_view(['GET', 'POST'])
 def login_user(request):
     if request.user.is_authenticated:
-        return redirect("api:complete_profile")
+        return Response(data="You are already logged in", status=status.HTTP_403_FORBIDDEN)
     
     if request.method == 'POST':
         serializer = LoginSerializer(data=request.data)
@@ -85,8 +86,8 @@ def login_user(request):
         if user is not None:
             login(request, user)
 
-            if profile_is_completed(user): return redirect("api:home")
-            else: return redirect("api:complete_profile")
+            if profile_is_completed(user): return Response({"user_role": user.user_role.role})
+            else: return Response({"redirect_to": reverse("api:complete_profile"), "user_role": user.user_role.role})
         else:
             return Response(data="The username or password is incorrect.", status=status.HTTP_404_NOT_FOUND)
     elif request.method == 'GET':
@@ -99,7 +100,7 @@ def login_user(request):
 @api_view(['GET'])
 def logout_user(request):
     logout(request)
-    return redirect("api:login")
+    return Response("User logged out successfully")
 
 ######################
 # Profile completion #
@@ -110,7 +111,7 @@ def logout_user(request):
 @api_view(['GET', 'POST'])
 def complete_profile(request):
     if profile_is_completed(request.user):
-        return redirect("api:home")
+        return Response(data="The user's profile already completed", status=status.HTTP_403_FORBIDDEN)
     
     if request.method == 'GET':
         return Response({"user_role": request.user.user_role.role})
@@ -123,11 +124,12 @@ def complete_profile(request):
 ###################
     
 @login_required
-@user_passes_test(profile_is_completed, login_url="/api/complete_profile/")
 @api_view(['GET'])
 def view_profile(request, username=None):
+    if not profile_is_completed(request.user):
+        return Response({"redirect_to": reverse("api:complete_profile"), "user_role": request.user.user_role.role})
     if username is None:
-        return redirect("api:view_profile", username=request.user.username)
+        return Response({"redirect_to": reverse("api:view_profile", args=request.user.username)})
     user = get_object_or_404(User, username=username)
 
     view_self = request.user == user
@@ -161,12 +163,13 @@ def home(request):
 #################
 
 @login_required
-@user_passes_test(profile_is_completed, login_url="/api/complete_profile/")
 @ensure_csrf_cookie
 @api_view(['GET', 'POST'])
 def create_course(request):
+    if not profile_is_completed(request.user):
+        return Response({"redirect_to": reverse("api:complete_profile"), "user_role": request.user.user_role.role})
     if not is_accepted_teacher(request.user):
-        return Response(status=status.HTTP_401_UNAUTHORIZED)
+        return Response(data="The teacher request either is still not reviwed or was rejected", status=status.HTTP_401_UNAUTHORIZED)
     if request.method == 'GET':
         required_data = {
             "required_data": [
@@ -188,7 +191,7 @@ def create_course(request):
             package_size = data['package_size'],
             thumbnail = data['thumbnail']
         )
-        return redirect("api:home")
+        return Response("The course has been created successfully")
 
 ###############
 # View Course #
@@ -207,13 +210,13 @@ def view_course(request, course_id:int):
 ##################
 
 @login_required
-@user_passes_test(profile_is_completed, login_url="/api/complete_profile/")
 @ensure_csrf_cookie
 @api_view(['GET', 'POST'])
 def create_lecture(request, course_id:int = None):
     if not is_accepted_teacher(request.user):
         return Response(status=status.HTTP_401_UNAUTHORIZED)
-
+    if not profile_is_completed(request.user):
+        return Response({"redirect_to": reverse("api:complete_profile"), "user_role": request.user.user_role.role})
     course = Course.objects.filter(teacher=Teacher.objects.get(teacher=request.user), pk=course_id)
     if not course.count():
         return Response(status=status.HTTP_401_UNAUTHORIZED)
@@ -226,7 +229,7 @@ def create_lecture(request, course_id:int = None):
             lecture_title = data['lecture_title'],
             video = data['video'],
         )
-        return redirect("api:view_lecture", course_id=course[0].pk, lecture_title=data['lecture_title'])
+        return Response({"redirect_to": reverse("api:view_lecture", args=(course[0].pk, data['lecture_title']))})
     elif request.method == 'GET': return Response()
     
 
@@ -235,7 +238,6 @@ def create_lecture(request, course_id:int = None):
 ################
 
 @login_required
-@user_passes_test(profile_is_completed, login_url="/api/complete_profile/")
 @api_view(['GET'])
 def view_lecture(request, course_id:int, lecture_title:str):
     user = request.user
@@ -252,7 +254,8 @@ def view_lecture(request, course_id:int, lecture_title:str):
 def my_courses(request):
     user = request.user
     if not user.is_authenticated: return Response("Not authenticated")
-    if not profile_is_completed(user): return redirect("api:complete_profile")
+    if not profile_is_completed(user):
+        return Response({"redirect_to": reverse("api:complete_profile"), "user_role": request.user.user_role.role})
     return Response(roles_to_actions[user.user_role.role]["my_courses"](user))
 
 
@@ -262,7 +265,7 @@ def my_courses(request):
 
 @api_view(['GET'])
 def get_courses(request, fields:str = "", subset=None):
-    if not subset: return redirect("api:get_portion_courses", subset=1)
+    if not subset: return Response({"redirect_to":reverse("api:get_portion_courses", args=(1,))})
     fields_to_filters = {
         "subject": "subject__subject_name",
         "teacher": "teacher__teacher__username",
