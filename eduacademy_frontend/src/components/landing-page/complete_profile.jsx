@@ -84,40 +84,46 @@ const CompleteProfile = () => {
 
         const formData = new FormData();
         const csrfToken = document.cookie
-        .split('; ')
-        .find((row) => row.startsWith('csrftoken='))
-        .split('=')[1];
+            .split('; ')
+            .find((row) => row.startsWith('csrftoken='))
+            .split('=')[1];
+
+
+        let response;
+        formData.append('personal_photo', form.personal_photo);
+        if (role === 'Student') {
+
+            formData.append('academic_year', form.academic_year);
+            formData.append('study_field', form.study_field);
+            formData.append('parent_name', form.parent_name);
+            formData.append('parent_phone_number', form.parent_phone_number);
+
+
+        } else {
+            formData.append('National_ID_photo', form.National_ID_photo);
+        }
+
 
         try {
-            let response;
+            response = await axios.post('/api/complete_profile/', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                    'X-CSRFToken': csrfToken
+                },
+            });
 
-            if (role === 'Student') {
-                // Append form data
-                formData.append('personal_photo', form.personal_photo);
-                formData.append('academic_year', form.academic_year);
-                formData.append('study_field', form.study_field);
-                formData.append('parent_name', form.parent_name);
-                formData.append('parent_phone_number', form.parent_phone_number);
-                response = await axios.post('/api/complete_profile/', formData, {
-                    headers: {
-                        'Content-Type': 'multipart/form-data',
-                        'X-CSRFToken': csrfToken
-                    },
-                });
-            } else {
-                formData.append('personal_photo', form.personal_photo);
-                formData.append('National_ID_photo', form.National_ID_photo);
-                response = await axios.post('/api/complete_profile/', formData, {
-                    headers: {
-                        'Content-Type': 'multipart/form-data',
-                        'X-CSRFToken': csrfToken
-                    },
+            if (response.status === 200) {
+                let resp_json = response.data
+                alert('Messgae: ' + resp_json.message);
+                navigate({
+                    pathname: `${resp_json.redirect_to}`,
+                    search: `?role=${resp_json.user_role}&username=${resp_json.username}`, // Pass user_role as a query parameter
                 });
             }
 
-            console.log(response);
+
         } catch (error) {
-            console.error('Error submitting form:', error);
+            alert('there is a proplem try again correctly')
         }
 
     }
