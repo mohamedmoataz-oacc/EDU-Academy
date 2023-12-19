@@ -33,7 +33,7 @@ def teacher_complete_profile(request):
     )
     teacher.save()
     TeachRequest.objects.create(teacher=teacher).save()
-    return Response({"message":"Teacher completed profile successfully",
+    return Response({"detail":"Teacher completed profile successfully",
                      "user_role":request.user.user_role.role,
                      "redirect_to":reverse("api:view_profile",args=(request.user.username,))})
 
@@ -45,12 +45,12 @@ def student_complete_profile(request):
     Student.objects.create(
         student=request.user,
         academic_year = data['academic_year'],
-        study_field = data['study_field'] if data.get('study_field') else None,
+        study_field = data.get('study_field'),
         parent_name = data['parent_name'],
         parent_phone_number = data['parent_phone_number'],
-        personal_photo = data['personal_photo'] if data.get('personal_photo') else None,
+        personal_photo = data.get('personal_photo'),
     ).save()
-    return Response({"message":"Student completed profile successfully",
+    return Response({"detail":"Student completed profile successfully",
                      "user_role":request.user.user_role.role,
                      "redirect_to":reverse("api:view_profile",args=(request.user.username,))})
 
@@ -64,7 +64,7 @@ def assistant_complete_profile(request):
         personal_photo = data['personal_photo'],
         national_ID_photo = data['national_ID_photo'],
     ).save()
-    return Response({"message":"Assistant completed profile successfully",
+    return Response({"detail":"Assistant completed profile successfully",
                      "user_role":request.user.user_role.role,
                      "redirect_to":reverse("api:view_profile",args=(request.user.username,))})
 
