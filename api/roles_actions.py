@@ -33,7 +33,9 @@ def teacher_complete_profile(request):
     )
     teacher.save()
     TeachRequest.objects.create(teacher=teacher).save()
-    return Response({"user_role":request.user.user_role.role, "redirect_to":reverse("api:view_profile", args=(request.user.username,))})
+    return Response({"message":"Teacher completed profile successfully",
+                     "user_role":request.user.user_role.role,
+                     "redirect_to":reverse("api:view_profile",args=(request.user.username,))})
 
 def student_complete_profile(request):
     serializer = StudentProfileSerializer(data=request.data)
@@ -48,7 +50,9 @@ def student_complete_profile(request):
         parent_phone_number = data['parent_phone_number'],
         personal_photo = data['personal_photo'] if data.get('personal_photo') else None,
     ).save()
-    return Response({"user_role":request.user.user_role.role, "redirect_to":reverse("api:view_profile", args=(request.user.username,))})
+    return Response({"message":"Student completed profile successfully",
+                     "user_role":request.user.user_role.role,
+                     "redirect_to":reverse("api:view_profile",args=(request.user.username,))})
 
 def assistant_complete_profile(request):
     serializer = AssistantProfileSerializer(data=request.data)
@@ -60,7 +64,9 @@ def assistant_complete_profile(request):
         personal_photo = data['personal_photo'],
         national_ID_photo = data['national_ID_photo'],
     ).save()
-    return Response({"user_role":request.user.user_role.role, "redirect_to":reverse("api:view_profile", args=(request.user.username,))})
+    return Response({"message":"Assistant completed profile successfully",
+                     "user_role":request.user.user_role.role,
+                     "redirect_to":reverse("api:view_profile",args=(request.user.username,))})
 
 
 ###################

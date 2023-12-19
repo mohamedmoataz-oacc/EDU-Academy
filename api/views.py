@@ -86,8 +86,13 @@ def login_user(request):
         if user is not None:
             login(request, user)
 
-            if profile_is_completed(user): return Response({"user_role": user.user_role.role})
-            else: return Response({"redirect_to": reverse("api:complete_profile"), "user_role": user.user_role.role})
+            if profile_is_completed(user):
+                return Response({"message":"User logged in successfully and profile is completed",
+                                 "user_role": user.user_role.role})
+            else:
+                return Response({"message":"User logged in successfully and profile is completed",
+                                 "redirect_to": reverse("api:complete_profile"),
+                                  "user_role": user.user_role.role})
         else:
             return Response(data="The username or password is incorrect.", status=status.HTTP_404_NOT_FOUND)
     elif request.method == 'GET':
@@ -109,7 +114,8 @@ def logout_user(request):
 @api_view(['GET', 'POST'])
 def complete_profile(request):
     if not request.user.is_authenticated:
-        Response({"redirect_to": reverse("api:login")}, status=status.HTTP_401_UNAUTHORIZED)
+        Response({"message":"User should log in first to complete his profile",
+                  "redirect_to": reverse("api:login")}, status=status.HTTP_401_UNAUTHORIZED)
     if profile_is_completed(request.user):
         return Response(data="The user's profile already completed", status=status.HTTP_403_FORBIDDEN)
     
@@ -126,9 +132,13 @@ def complete_profile(request):
 @api_view(['GET'])
 def view_profile(request, username=None):
     if not request.user.is_authenticated:
-        Response({"redirect_to": reverse("api:login")}, status=status.HTTP_401_UNAUTHORIZED)
+        Response({"message":"User should log in first to view profiles",
+                  "redirect_to": reverse("api:login")},
+                  status=status.HTTP_401_UNAUTHORIZED)
     if not profile_is_completed(request.user):
-        return Response({"redirect_to": reverse("api:complete_profile"), "user_role": request.user.user_role.role})
+        return Response({"message":"User should complete his account view profiles",
+                         "redirect_to": reverse("api:complete_profile"),
+                          "user_role": request.user.user_role.role})
     if username is None:
         return Response({"redirect_to": reverse("api:view_profile", args=request.user.username)})
     user = get_object_or_404(User, username=username)
@@ -167,9 +177,13 @@ def home(request):
 @api_view(['GET', 'POST'])
 def create_course(request):
     if not request.user.is_authenticated:
-        Response({"redirect_to": reverse("api:login")}, status=status.HTTP_401_UNAUTHORIZED)
+        Response({"message":" The user is not authenticated to create a course",
+                  "redirect_to": reverse("api:login")},
+                  status=status.HTTP_401_UNAUTHORIZED)
     if not profile_is_completed(request.user):
-        return Response({"redirect_to": reverse("api:complete_profile"), "user_role": request.user.user_role.role})
+        return Response({"message":"User should complete his profile",
+                         "redirect_to": reverse("api:complete_profile"),
+                           "user_role": request.user.user_role.role})
     if not is_accepted_teacher(request.user):
         return Response(data="The teacher request either is still not reviwed or was rejected", status=status.HTTP_401_UNAUTHORIZED)
     if request.method == 'GET':
@@ -215,14 +229,20 @@ def view_course(request, course_id:int):
 @api_view(['GET', 'POST'])
 def create_lecture(request, course_id:int = None):
     if not request.user.is_authenticated:
-        Response({"redirect_to": reverse("api:login")}, status=status.HTTP_401_UNAUTHORIZED)
+        Response({"message":"The user is not authenticated to create a lecture",
+                  "redirect_to": reverse("api:login")},
+                    status=status.HTTP_401_UNAUTHORIZED)
     if not is_accepted_teacher(request.user):
-        return Response(status=status.HTTP_401_UNAUTHORIZED)
+        return Response(data="User should be a teacher to create a lecture",
+                         status=status.HTTP_401_UNAUTHORIZED)
     if not profile_is_completed(request.user):
-        return Response({"redirect_to": reverse("api:complete_profile"), "user_role": request.user.user_role.role})
+        return Response({"message":"User should complete his profile to create a lecture",
+                         "redirect_to": reverse("api:complete_profile"),
+                           "user_role": request.user.user_role.role})
     course = Course.objects.filter(teacher=Teacher.objects.get(teacher=request.user), pk=course_id)
     if not course.count():
-        return Response(status=status.HTTP_401_UNAUTHORIZED)
+        return Response(data="Teacher is trying to create a lecture in other teacher course",
+                        status=status.HTTP_401_UNAUTHORIZED)
     if request.method == 'POST':
         serializer = LectureCreationSerializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
@@ -232,7 +252,8 @@ def create_lecture(request, course_id:int = None):
             lecture_title = data['lecture_title'],
             video = data['video'],
         )
-        return Response({"redirect_to": reverse("api:view_lecture", args=(course[0].pk, data['lecture_title']))})
+        return Response({"message":"Lecture created successfully",
+                         "redirect_to": reverse("api:view_lecture", args=(course[0].pk, data['lecture_title']))})
     elif request.method == 'GET': return Response()
     
 
@@ -244,7 +265,9 @@ def create_lecture(request, course_id:int = None):
 def view_lecture(request, course_id:int, lecture_title:str):
     user = request.user
     if not user.is_authenticated:
-        Response({"redirect_to": reverse("api:login")}, status=status.HTTP_401_UNAUTHORIZED)
+        Response({"message":"User should be logged in to view lecture",
+                  "redirect_to": reverse("api:login")},
+                    status=status.HTTP_401_UNAUTHORIZED)
     course = Course.objects.get(pk=course_id)
     lecture = get_object_or_404(Lecture, lecture_title=lecture_title, course=course)
     return Response(roles_to_actions[user.user_role.role]["view_lecture"](user, lecture))
@@ -257,9 +280,13 @@ def view_lecture(request, course_id:int, lecture_title:str):
 def my_courses(request):
     user = request.user
     if not request.user.is_authenticated:
-        Response({"redirect_to": reverse("api:login")}, status=status.HTTP_401_UNAUTHORIZED)
+        Response({"message":"User should be logged in to view his courses",
+                  "redirect_to": reverse("api:login")},
+                    status=status.HTTP_401_UNAUTHORIZED)
     if not profile_is_completed(user):
-        return Response({"redirect_to": reverse("api:complete_profile"), "user_role": request.user.user_role.role})
+        return Response({"message":"User should complete his profile to view his courses",
+                         "redirect_to": reverse("api:complete_profile"),
+                           "user_role": request.user.user_role.role})
     return Response(roles_to_actions[user.user_role.role]["my_courses"](user))
 
 
