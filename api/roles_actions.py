@@ -6,8 +6,10 @@ from django.shortcuts import redirect, get_object_or_404
 from django.urls import reverse
 from django.db.models import Avg
 from rest_framework.response import Response
+from rest_framework import status
 from .serializers import *
 from .views_checks import *
+from models import *
 
 # Note that `request.FILES` will only contain data if the request method was POST,
 # at least one file field was actually posted,
@@ -274,17 +276,64 @@ def assistant_view_course(user, course_id):
     )
     return basic_course_info
 
+#######################
+# Get lecture content #
+#######################
+
+def get_lecture_content(course, lecture):
+    attachments_number = Attachment.objects.filter(lecture=lecture).count()
+    quiz = Quiz.objects.get(lecture=lecture)
+    assignment = Assignment.objects.get(lecture=lecture)
+    qa = QA.objects.filter(lecture=lecture)
+    content = {
+        "attached_files_number" : attachments_number,
+        "Quiz" : {
+            "quiz_id" : quiz.id,
+            "quiz_duration_in_minutes" : quiz.duration_in_minutes,
+            "start_date" : quiz.start_date
+        },
+        "assignment" : {
+            "assignment_id" : assignment.id,
+            "assignment_upload_date" : assignment.upload_date 
+        },
+        "QA" : [
+            {
+                "qa_id" : q.pk,
+                "qa_student_username" : q.student.student.username,
+                "qa_question" : q.question,
+                "closed" : q.closed,
+                "qa_date" : q.question_date,
+                "answers" : [
+                    {
+                        "qa_answer_student" : answer.user.username,
+                        "upvotes_number" : answer.upvotes,
+                        "marked_as_correct" : answer.marked_correct,
+                        "answer_date" : answer.answer_date,
+                    } for answer in QAAnswer.objects.filter(qa=q, lecture=lecture)
+                ]
+            } for q in qa
+        ]
+    }
+    return content
 
 ################
-# View Lecture #
+# View lecture #
 ################
 
-def teacher_view_lecture(user, course_id, lecture_title): ...
+def teacher_view_lecture(user, course, lecture):
+    if not teacher_created_course(user, course.pk):
+        return Response(status=status.HTTP_401_UNAUTHORIZED)
+    return get_lecture_content(course, lecture)
+    
+def student_view_lecture(user, course, lecture):
+    if not student_bought_lecture(user, lecture):
+        return Response(status=status.HTTP_401_UNAUTHORIZED)
+    return get_lecture_content(course, lecture)
 
-def student_view_lecture(user, course_id, lecture_title): ...
-
-def assistant_view_lecture(user, course_id, lecture_title): ...
-
+def assistant_view_lecture(user, course, lecture):
+    if not assistant_assisting_in_course(user, course.pk):
+        return Response(status=status.HTTP_401_UNAUTHORIZED)
+    return get_lecture_content(course, lecture)
 
 ####################
 # Roles -> actions #

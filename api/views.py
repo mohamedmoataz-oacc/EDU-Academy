@@ -240,10 +240,12 @@ def create_lecture(request, course_id:int = None):
 
 @login_required
 @api_view(['GET'])
+@user_passes_test(profile_is_completed, login_url="/api/complete_profile/")
 def view_lecture(request, course_id:int, lecture_title:str):
     user = request.user
-    return roles_to_actions[user.user_role.role]["view_lecture"](user, course_id, lecture_title)
-
+    course = Course.objects.get(pk=course_id)
+    lecture = get_object_or_404(Lecture, lecture_title=lecture_title, course=course)
+    return Response(roles_to_actions[user.user_role.role]["view_lecture"](user, course, lecture))
 
 ##############
 # My courses #

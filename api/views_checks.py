@@ -1,4 +1,4 @@
-from .models import Teacher, Student, Assistant, Course
+from .models import Teacher, Student, Assistant, Course, Payment
 
 roles_to_models = {"Teacher": Teacher, "Student": Student, "Assistant": Assistant}
 
@@ -37,3 +37,7 @@ def assistant_assisting_in_course(user, course_id:int):
         course = assistant.course_set.filter(pk=course_id).count()
         return course
     return False
+
+def student_bought_lecture(user, lecture):
+    student = Student.objects.get(student=user)
+    return Payment.objects.filter(student=student, lecture=lecture).count()
