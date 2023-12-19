@@ -347,17 +347,17 @@ def get_lecture_content(lecture):
 def teacher_view_lecture(user, lecture):
     if not teacher_created_course(user, lecture.course.pk):
         return Response(status=status.HTTP_401_UNAUTHORIZED)
-    return get_lecture_content(lecture)
+    return Response(get_lecture_content(lecture))
 
 def student_view_lecture(user, lecture):
     if not student_bought_lecture(user, lecture):
         return Response(status=status.HTTP_402_PAYMENT_REQUIRED)
-    return get_lecture_content(lecture)
+    return Response(get_lecture_content(lecture))
 
 def assistant_view_lecture(user, lecture):
     if not assistant_assisting_in_course(user, lecture.course.pk):
         return Response(status=status.HTTP_401_UNAUTHORIZED)
-    return get_lecture_content(lecture)
+    return Response(get_lecture_content(lecture))
 
 ####################
 # Roles -> actions #

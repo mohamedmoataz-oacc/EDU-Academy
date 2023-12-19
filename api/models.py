@@ -4,6 +4,9 @@ from django.contrib.auth.models import AbstractUser
 class UsersRole(models.Model):
     role = models.CharField(max_length=15, unique=True)
 
+class PaymentMethod(models.Model):
+    method = models.CharField(max_length=10, unique=True)
+
 class User(AbstractUser):
     gender_choices = [("M", "Male"), ("F", "Female")]
 
@@ -28,14 +31,14 @@ class Notification(models.Model):
 
 class Student(models.Model):
     academic_year_choices = ([(i, f"Junior {i}") for i in range(1, 7)] + 
-                            [(i - 6, f"Middle {i}") for i in range(7, 10)] +
-                            [(i - 9, f"Senior {i}") for i in range(10, 13)])
+                            [(i, f"Middle {i - 6}") for i in range(7, 10)] +
+                            [(i, f"Senior {i - 9}") for i in range(10, 13)])
     study_field_choices = [(0, "3elmy 3loom"), (1, "3elmy reyada"), (2, "Adaby")]
-    
+
     student = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
 
-    academic_year = models.CharField(max_length=10, choices=academic_year_choices)
-    study_field = models.CharField(max_length=15, choices=study_field_choices, null=True, blank=True)
+    academic_year = models.SmallIntegerField(choices=academic_year_choices)
+    study_field = models.SmallIntegerField(choices=study_field_choices, null=True, blank=True)
     parent_phone_number = models.IntegerField()
     parent_name = models.CharField(max_length=60)
     points = models.IntegerField(default=0)
@@ -189,15 +192,15 @@ class Payment(models.Model):
         unique_together = ("student", "lecture")
 
 class PointsTransaction(models.Model):
-    student = models.ForeignKey(Student, on_delete=models.PROTECT)
-    payment = models.ForeignKey(Payment, on_delete=models.PROTECT)
+    student = models.ForeignKey(Student, on_delete=models.CASCADE)
+    payment = models.ForeignKey(Payment, on_delete=models.CASCADE)
 
     amount = models.IntegerField()
     transaction_date = models.DateTimeField(auto_now_add=True)
 
 class StudentBalanceTransaction(models.Model):
-    student = models.ForeignKey(Student, on_delete=models.PROTECT)
-    payment = models.ForeignKey(Payment, on_delete=models.PROTECT)
+    student = models.ForeignKey(Student, on_delete=models.CASCADE)
+    payment = models.ForeignKey(Payment, on_delete=models.CASCADE)
 
     amount = models.IntegerField()
     transaction_date = models.DateTimeField(auto_now_add=True)

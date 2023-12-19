@@ -1,3 +1,4 @@
+from django.db import IntegrityError
 from django.shortcuts import get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.views.decorators.csrf import ensure_csrf_cookie
@@ -268,7 +269,7 @@ def view_lecture(request, course_id:int, lecture_title:str):
                     status=status.HTTP_401_UNAUTHORIZED)
     course = Course.objects.get(pk=course_id)
     lecture = get_object_or_404(Lecture, lecture_title=lecture_title, course=course)
-    return Response(roles_to_actions[user.user_role.role]["view_lecture"](user, lecture))
+    return roles_to_actions[user.user_role.role]["view_lecture"](user, lecture)
 
 
 ####################
@@ -284,13 +285,14 @@ def pay_for_lecture(request, lecture_id):
         return Response(status=status.HTTP_401_UNAUTHORIZED)
     if not profile_is_completed(request.user):
         return Response({"redirect_to": reverse("api:complete_profile"), "user_role": request.user.user_role.role})
-    if request.method == "GET":
-        return Response()
 
     lecture = get_object_or_404(Lecture, pk=lecture_id)
     student = Student.objects.get(student=request.user)
     course = lecture.course
     teacher = course.teacher
+
+    if request.method == "GET":
+        return Response()
 
     serializer = PaymentsSerializer(data=request.data)
     if serializer.is_valid(raise_exception=True):
@@ -305,26 +307,36 @@ def pay_for_lecture(request, lecture_id):
     
     if data['method'] == 'balance':
         if student.balance < course.lecture_price:
-            return Response(data={"detail": "Insufficient balance"}, status=status.HTTP_403_FORBIDDEN)
+            return Response(data={"message": "Insufficient balance"}, status=status.HTTP_403_FORBIDDEN)
 
-        p.save()
+        try: p.save()
+        except IntegrityError:
+            return Response(data={"message": "You already bought this lecture"}, status=status.HTTP_403_FORBIDDEN)
+
         StudentBalanceTransaction.objects.create(
             payment=p,
             student=student,
             amount=course.lecture_price,
         ).save()
-        student.update(balance = F('balance') - course.lecture_price)
+
+        student.balance = F('balance') - course.lecture_price
+        student.save()
     elif data['method'] == 'points':
         if points_to_pounds(student.points) < course.lecture_price:
-            return Response(data={"detail": "Insufficient points"}, status=status.HTTP_403_FORBIDDEN)
+            return Response(data={"message": "Insufficient points"}, status=status.HTTP_403_FORBIDDEN)
 
-        p.save()
+        try: p.save()
+        except IntegrityError:
+            return Response(data={"message": "You already bought this lecture"}, status=status.HTTP_403_FORBIDDEN)
+
         PointsTransaction.objects.create(
             payment=p,
             student=student,
             amount=pounds_to_points(course.lecture_price),
         ).save()
-        student.update(points = F('points') - pounds_to_points(course.lecture_price))
+        
+        student.points = F('points') - pounds_to_points(course.lecture_price)
+        student.save()
     
     if (Payment.objects.filter(student=student, course=course).count() >= 2 and
     Enrollment.objects.filter(student=student, course=course).count() == 0):
