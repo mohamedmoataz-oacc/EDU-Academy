@@ -7,9 +7,9 @@ export const Navigation = () => {
   return (
     <div className='nav'>
       <CustomLink className="About Link" to="">About</CustomLink>
-      <CustomLink className="teacher Link" to="/teacher">Teachers</CustomLink>
+      <CustomLink className="teacher Link" to="/Teacher">Teachers</CustomLink>
       <a className="contact Link" href='/#footer'>Contact</a>
-      <CustomLink className="login" to="/login">Login</CustomLink>
+      <CustomLink className="login" to="/Login">Login</CustomLink>
     </div>
 
   )
