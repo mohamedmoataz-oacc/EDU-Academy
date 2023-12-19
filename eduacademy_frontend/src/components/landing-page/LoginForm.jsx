@@ -82,19 +82,19 @@ const Auth = () => {
                     user_role: form.user_role,
                     birth_date: form.birth_date
 
-                } , {maxRedirects: 0 })
+                }, { maxRedirects: 0 })
 
-              
+
                 if (response.status === 200) {
-                    alert('Message: signup sent successfully');
+                    alert('Message:' + response.data);
                     setIsSignup(false)
                 }
-              
+
 
             } catch (error) {
-                if (error.response.status === 400 ) {
+                if (error.response.status === 400) {
                     alert(`Message: Your information is badly formatted OR there is user with the same username OR email address PLease try again`)
-                } else if (error.response.status === 403){
+                } else if (error.response.status === 403) {
                     alert('Message: You Already Loged In');
                 } else {
                     alert('Message: Unkown/Netwrok error');
@@ -108,37 +108,33 @@ const Auth = () => {
                 response = await axios.post('/api/login/', {
                     username: form.username,
                     password: form.password,
-                } , );
-                
-                
+                },);
+
+
                 if (response.status === 200) {
-                    alert('Message: Logged in successfully');
-                    
-                    let route = response.request.responseURL;
-                    let user_role = response.data.user_role;
-                
-                    console.log('Route:', route);
-                
-                    if (route.includes("complete_profile")) {
-                        // Use history to navigate with query parameters
+                    let resp_json = response.data;
+
+
+                    if (resp_json.redirect_to === undefined) {
+                        alert(resp_json.message)
                         navigate({
-                            pathname: '/CompleteProfile',
-                            search: `?role=${user_role}`, // Pass user_role as a query parameter
+                            pathname: `/Home`
                         });
-                    }else{
+                    } else {
+                        alert(resp_json.message)
                         navigate({
-                            pathname: '/home',
-                            search: `?role=${user_role}`, // Pass user_role as a query parameter
+                            pathname: `${resp_json.redirect_to}`,
+                            search: `?role=${resp_json.user_role}`, // Pass user_role as a query parameter
                         });
                     }
                 }
 
             } catch (error) {
-                if (error.response.status === 404 ) {
+                if (error.response.status === 404) {
                     alert('Message:' + error.response.data);
                 } else if (error.response.status === 403) {
                     alert('Message: You Already Loged In');
-                }else{
+                } else {
                     alert('Message: Unkown/Netwrok error');
                 }
             }
