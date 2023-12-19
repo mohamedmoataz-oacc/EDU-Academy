@@ -458,6 +458,7 @@ h6, h5{
   font-size: large;
   color:#0c0762;
 }
+
 .course-info *{
   margin-bottom: 10px;
 }
@@ -644,7 +645,51 @@ h6, h5{
   margin:10px;
   font-size: 20px;
 }
-.info p .strong{
+.strong{
   font-weight: 600;
 }
 
+.U-container{
+  margin-top: 200px;
+}
+
+.teacherp{
+  padding: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.teacherp .great{
+  padding: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  padding:50px;
+}
+.teacherp .great h1{
+  margin:0 10px 10px 0;
+  color: #0a0651;
+}
+.teacherp .great p{
+  font-size: 20px;
+  text-align: center;
+}
+
+.teacherp button{
+  padding:18px;
+  background-color: #150dab;
+  color: #fefefe;
+  outline: none;
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  margin-top: 80px;
+  box-shadow: 2px 2px 4px #000000;
+}
+
+.teacherp button:hover{
+  background-color: #0f0a7a;
+  cursor: pointer;
+  
+}
