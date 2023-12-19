@@ -9,7 +9,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from .serializers import *
 from .views_checks import *
-from models import *
+from .models import *
 
 # Note that `request.FILES` will only contain data if the request method was POST,
 # at least one file field was actually posted,
@@ -73,8 +73,8 @@ def teacher_view_profile(user, user_profile: dict, view_self):
         {
             "balance" : teacher.balance if view_self else None,
             "accepted" : teacher.accepted,
-            "personal_photo" : str(teacher.personal_photo),
-            "national_ID_photo" : str(teacher.national_ID_photo) if view_self else None,
+            "personal_photo" : f"media/{teacher.personal_photo}",
+            "national_ID_photo" : f"media/{teacher.national_ID_photo}" if view_self else None,
         }
     )
     return Response(user_profile)
@@ -91,7 +91,7 @@ def student_view_profile(user, user_profile: dict, view_self):
             "points" : student.points if view_self else None,
             "balance" : student.balance if view_self else None,
             "verified" : student.verified if view_self else None,
-            "personal_photo" : str(student.personal_photo) if student.personal_photo else None,
+            "personal_photo" : f"media/{student.personal_photo}" if student.personal_photo else None,
             "badges" : [badge.badge_name for badge in badges_list]
         }
     )
@@ -101,8 +101,8 @@ def assistant_view_profile(user, user_profile: dict, view_self):
     assistant = Assistant.objects.get(assistant=user)
     user_profile.update(
         {
-            "personal_photo" : str(assistant.personal_photo),
-            "national_ID_photo" : str(assistant.national_ID_photo) if view_self else None,
+            "personal_photo" : f"media/{assistant.personal_photo}",
+            "national_ID_photo" : f"media/{assistant.national_ID_photo}" if view_self else None,
         }
     )
     return Response(user_profile)
@@ -112,35 +112,35 @@ def assistant_view_profile(user, user_profile: dict, view_self):
 # Home #
 ########
 
-def teacher_home(user):
-    return Response("Home Page")
+# def teacher_home(user):
+#     return Response("Home Page")
 
-def student_home(user):
-    enrolled_courses = student_my_courses(user)
-    student = Student.objects.get(student=user)
-    courses = Course.objects.all().difference(student.course_set.all())[:20]
+# def student_home(user):
+#     enrolled_courses = student_my_courses(user)
+#     student = Student.objects.get(student=user)
+#     courses = Course.objects.all().difference(student.course_set.all())[:20]
 
-    not_enrolled_courses = [
-        {
-            "name": course.course_name,
-            "description": course.description,
-            "is_completed": course.completed,
-            "teacher": User.objects.get(pk=course.teacher.pk).first_name + " " +
-                       User.objects.get(pk=course.teacher.pk).last_name,
-            "thumbnail" : f"media/{course.thumbnail}",
-            "subject": course.subject.subject_name,
-        } for course in courses
-    ]
+#     not_enrolled_courses = [
+#         {
+#             "name": course.course_name,
+#             "description": course.description,
+#             "is_completed": course.completed,
+#             "teacher": User.objects.get(pk=course.teacher.pk).first_name + " " +
+#                        User.objects.get(pk=course.teacher.pk).last_name,
+#             "thumbnail" : f"media/{course.thumbnail}",
+#             "subject": course.subject.subject_name,
+#         } for course in courses
+#     ]
 
-    output = {
-        "enrolled_courses": enrolled_courses,
-        "not_enrolled_courses": not_enrolled_courses,
-    }
+#     output = {
+#         "enrolled_courses": enrolled_courses,
+#         "not_enrolled_courses": not_enrolled_courses,
+#     }
 
-    return Response(output)
+#     return Response(output)
 
-def assistant_home(user):
-    return Response("Home Page")
+# def assistant_home(user):
+#     return Response("Home Page")
 
 
 ##############
@@ -280,22 +280,23 @@ def assistant_view_course(user, course_id):
 # Get lecture content #
 #######################
 
-def get_lecture_content(course, lecture):
+def get_lecture_content(lecture):
     attachments_number = Attachment.objects.filter(lecture=lecture).count()
-    quiz = Quiz.objects.get(lecture=lecture)
-    assignment = Assignment.objects.get(lecture=lecture)
+    quiz = Quiz.objects.filter(lecture=lecture)
+    assignment = Assignment.objects.filter(lecture=lecture)
     qa = QA.objects.filter(lecture=lecture)
     content = {
         "attached_files_number" : attachments_number,
+        "video": f"media/{lecture.video}",
         "Quiz" : {
-            "quiz_id" : quiz.id,
-            "quiz_duration_in_minutes" : quiz.duration_in_minutes,
-            "start_date" : quiz.start_date
-        },
+            "quiz_id" : quiz[0].id,
+            "quiz_duration_in_minutes" : quiz[0].duration_in_minutes,
+            "start_date" : quiz[0].start_date
+        } if len(quiz) else None,
         "assignment" : {
-            "assignment_id" : assignment.id,
-            "assignment_upload_date" : assignment.upload_date 
-        },
+            "assignment_id" : assignment[0].id,
+            "assignment_upload_date" : assignment[0].upload_date 
+        } if len(assignment) else None,
         "QA" : [
             {
                 "qa_id" : q.pk,
@@ -312,7 +313,7 @@ def get_lecture_content(course, lecture):
                     } for answer in QAAnswer.objects.filter(qa=q, lecture=lecture)
                 ]
             } for q in qa
-        ]
+        ] if len(qa) else None,
     }
     return content
 
@@ -320,20 +321,20 @@ def get_lecture_content(course, lecture):
 # View lecture #
 ################
 
-def teacher_view_lecture(user, course, lecture):
-    if not teacher_created_course(user, course.pk):
+def teacher_view_lecture(user, lecture):
+    if not teacher_created_course(user, lecture.course.pk):
         return Response(status=status.HTTP_401_UNAUTHORIZED)
-    return get_lecture_content(course, lecture)
-    
-def student_view_lecture(user, course, lecture):
+    return get_lecture_content(lecture)
+
+def student_view_lecture(user, lecture):
     if not student_bought_lecture(user, lecture):
         return Response(status=status.HTTP_401_UNAUTHORIZED)
-    return get_lecture_content(course, lecture)
+    return get_lecture_content(lecture)
 
-def assistant_view_lecture(user, course, lecture):
-    if not assistant_assisting_in_course(user, course.pk):
+def assistant_view_lecture(user, lecture):
+    if not assistant_assisting_in_course(user, lecture.course.pk):
         return Response(status=status.HTTP_401_UNAUTHORIZED)
-    return get_lecture_content(course, lecture)
+    return get_lecture_content(lecture)
 
 ####################
 # Roles -> actions #
@@ -343,7 +344,7 @@ roles_to_actions = {
     "Teacher": {
         "completion": teacher_complete_profile,
         "viewing": teacher_view_profile,
-        "home": teacher_home,
+        # "home": teacher_home,
         "my_courses": teacher_my_courses,
         "view_course": teacher_view_course,
         "view_lecture": teacher_view_lecture,
@@ -351,7 +352,7 @@ roles_to_actions = {
     "Student": {
         "completion": student_complete_profile,
         "viewing": student_view_profile,
-        "home": student_home,
+        # "home": student_home,
         "my_courses": student_my_courses,
         "view_course": student_view_course,
         "view_lecture": student_view_lecture,
@@ -359,7 +360,7 @@ roles_to_actions = {
     "Assistant": {
         "completion": assistant_complete_profile,
         "viewing": assistant_view_profile,
-        "home": assistant_home,
+        # "home": assistant_home,
         "my_courses": assistant_my_courses,
         "view_course": assistant_view_course,
         "view_lecture": assistant_view_lecture,

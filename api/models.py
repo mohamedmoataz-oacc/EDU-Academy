@@ -41,7 +41,7 @@ class Student(models.Model):
     points = models.IntegerField(default=0)
     balance = models.IntegerField(default=0)
     verified = models.BooleanField(default=False)
-    personal_photo = models.ImageField(null=True, blank=True)
+    personal_photo = models.ImageField(upload_to="students/personal_photos/", null=True, blank=True)
 
 class PointsTransaction(models.Model):
     student_id = models.ForeignKey(Student, on_delete=models.PROTECT)
@@ -72,8 +72,8 @@ class Teacher(models.Model):
 
     balance = models.PositiveIntegerField(default=0)
     accepted = models.BooleanField(default=None, null=True, blank=True)
-    personal_photo = models.ImageField(null=True, blank=True)
-    national_ID_photo = models.ImageField(null=True, blank=True)
+    personal_photo = models.ImageField(upload_to="teachers/personal_photos/")
+    national_ID_photo = models.ImageField(upload_to="teachers/national_IDs/")
 
 class TeachRequest(models.Model):
     teacher = models.OneToOneField(Teacher, on_delete=models.CASCADE)
@@ -111,8 +111,8 @@ class TeacherRating(models.Model):
 class Assistant(models.Model):
     assistant = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
 
-    personal_photo = models.ImageField(null=True, blank=True)
-    national_ID_photo = models.ImageField(null=True, blank=True)
+    personal_photo = models.ImageField(upload_to="assistants/personal_photos/")
+    national_ID_photo = models.ImageField(upload_to="assistants/national_IDs/")
 
 class AssistanceRequest(models.Model):
     teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE)
@@ -141,7 +141,7 @@ class Course(models.Model):
     description = models.TextField()
     lecture_price = models.PositiveIntegerField()
     package_size = models.PositiveSmallIntegerField()
-    thumbnail = models.ImageField(null=True, blank=True, upload_to="courses_thumbnails/")
+    thumbnail = models.ImageField(upload_to="courses/courses_thumbnails/")
     creation_date = models.DateTimeField(auto_now_add=True)
     completed = models.BooleanField(default=False)
 
@@ -189,7 +189,7 @@ class Warnings(models.Model):
 class Attachment(models.Model):
     lecture = models.ForeignKey(Lecture, on_delete=models.CASCADE)
     
-    attachment = models.FileField(null=True, max_length=250)
+    attachment = models.FileField(null=True, max_length=250, upload_to="lectures/attachments/")
 
 class Payment(models.Model):
     teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE)
@@ -201,7 +201,7 @@ class Payment(models.Model):
     amount = models.PositiveSmallIntegerField()
 
 class Quiz(models.Model):
-    lecture = models.ForeignKey(Lecture, on_delete=models.CASCADE)
+    lecture = models.OneToOneField(Lecture, on_delete=models.CASCADE)
 
     duration_in_minutes = models.PositiveSmallIntegerField()
     start_date = models.DateTimeField()
@@ -237,7 +237,7 @@ class QuizQuestionAnswer(models.Model):
     answer = models.TextField()
 
 class Assignment(models.Model):
-    lecture = models.ForeignKey(Lecture, on_delete=models.CASCADE)
+    lecture = models.OneToOneField(Lecture, on_delete=models.CASCADE)
 
     upload_date = models.DateTimeField(auto_now_add=True)
 

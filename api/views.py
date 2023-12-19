@@ -151,8 +151,6 @@ def view_profile(request, username=None):
 # Home page #
 #############
 
-@login_required
-@user_passes_test(profile_is_completed, login_url="/api/complete_profile/")
 @api_view(['GET'])
 def home(request):
     user = request.user
@@ -161,8 +159,6 @@ def home(request):
 #################
 # Create course #
 #################
-
-# REMEMBER TO REMOVE PARTIAL
 
 @login_required
 @user_passes_test(profile_is_completed, login_url="/api/complete_profile/")
@@ -180,7 +176,7 @@ def create_course(request):
         }
         return Response(required_data)
     elif request.method == 'POST':
-        serializer = CourseCreationSerializer(data=request.data, partial=True)
+        serializer = CourseCreationSerializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
             data = serializer.data
         Course.objects.create(
@@ -190,7 +186,7 @@ def create_course(request):
             description = data['description'],
             lecture_price = data['lecture_price'],
             package_size = data['package_size'],
-            # thumbnail = data['thumbnail']
+            thumbnail = data['thumbnail']
         )
         return redirect("api:home")
 
@@ -222,13 +218,13 @@ def create_lecture(request, course_id:int = None):
     if not course.count():
         return Response(status=status.HTTP_401_UNAUTHORIZED)
     if request.method == 'POST':
-        serializer = LectureCreationSerializer(data=request.data, partial=True)
+        serializer = LectureCreationSerializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
             data = serializer.data
         Lecture.objects.create(
             course = course[0],
             lecture_title = data['lecture_title'],
-            # video = data['video'],
+            video = data['video'],
         )
         return redirect("api:view_lecture", course_id=course[0].pk, lecture_title=data['lecture_title'])
     elif request.method == 'GET': return Response()
@@ -239,13 +235,13 @@ def create_lecture(request, course_id:int = None):
 ################
 
 @login_required
-@api_view(['GET'])
 @user_passes_test(profile_is_completed, login_url="/api/complete_profile/")
+@api_view(['GET'])
 def view_lecture(request, course_id:int, lecture_title:str):
     user = request.user
     course = Course.objects.get(pk=course_id)
     lecture = get_object_or_404(Lecture, lecture_title=lecture_title, course=course)
-    return Response(roles_to_actions[user.user_role.role]["view_lecture"](user, course, lecture))
+    return Response(roles_to_actions[user.user_role.role]["view_lecture"](user, lecture))
 
 ##############
 # My courses #
@@ -253,9 +249,10 @@ def view_lecture(request, course_id:int, lecture_title:str):
 
 @login_required
 @api_view(['GET'])
-@user_passes_test(profile_is_completed, login_url="/api/complete_profile/")
 def my_courses(request):
     user = request.user
+    if not user.is_authenticated: return Response("Not authenticated")
+    if not profile_is_completed(user): return redirect("api:complete_profile")
     return Response(roles_to_actions[user.user_role.role]["my_courses"](user))
 
 
