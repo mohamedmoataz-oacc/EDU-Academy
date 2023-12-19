@@ -1,6 +1,6 @@
 import React from 'react'
 
-export const Profile = () => {
+const Profile = () => {
   const user_data = {
     view_self : true,
     username : "",
@@ -74,3 +74,5 @@ export const Profile = () => {
     </div>
   )
 }
+
+export default Profile
