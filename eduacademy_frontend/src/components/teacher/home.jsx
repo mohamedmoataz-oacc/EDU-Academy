@@ -5,34 +5,12 @@ import books from '../Assets/books.png';
 import purple from '../Assets/purple.png';
 
 
-export const Homes = () => {
-    const courses = [
-        {
-          course_name: 'Introduction to Programming',
-          subject: 'Computer Science',
-          thumbnail: books,
-          creation_date: '2023-01-15',
-          course_description: 'Learn the basics of programming and coding principles.',
-          is_completed: true
-        },
-        {
-          course_name: 'Mathematics Fundamentals',
-          subject: 'Mathematics',
-          thumbnail: books,
-          creation_date: '2023-02-10',
-          course_description: 'Explore fundamental concepts in mathematics and problem-solving.',
-          is_completed:false,
-        },
-        // Add more courses as needed
-      ];
-      
+export const Homes = (courses, name) => {
     
-
-
   return (
     <>
     <div className='teacherp '>
-        <div className='great user-container'><h1>Welcome back, Yousef!</h1>
+        <div className='great user-container'><h1>Welcome back, {name}!</h1>
          <p>
         Your commitment to education is truly commendable.
         Your influence extends far beyond the classroom,<br></br>
