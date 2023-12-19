@@ -185,6 +185,9 @@ class Payment(models.Model):
     lecture = models.ForeignKey(Lecture, on_delete=models.CASCADE)
     student = models.ForeignKey(Student, on_delete=models.CASCADE)
 
+    class Meta:
+        unique_together = ("student", "lecture")
+
 class PointsTransaction(models.Model):
     student = models.ForeignKey(Student, on_delete=models.PROTECT)
     payment = models.ForeignKey(Payment, on_delete=models.PROTECT)

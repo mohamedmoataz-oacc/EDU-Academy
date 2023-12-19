@@ -326,6 +326,10 @@ def pay_for_lecture(request, lecture_id):
         ).save()
         student.update(points = F('points') - pounds_to_points(course.lecture_price))
     
+    if (Payment.objects.filter(student=student, course=course).count() >= 2 and
+    Enrollment.objects.filter(student=student, course=course).count() == 0):
+        Enrollment.objects.create(student=student, course=course)
+
     return Response(data={"message": "Payment successful"})
 
 
