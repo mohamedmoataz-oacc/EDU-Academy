@@ -6,7 +6,7 @@ import axios from 'axios';
 
 
 
- const CompleteProfile = () => {
+const CompleteProfile = () => {
 
 
     const navigate = useNavigate();
@@ -21,17 +21,13 @@ import axios from 'axios';
         const fetchData = async () => {
             try {
                 const response = await axios.get('/api/complete_profile/', { maxRedirects: 0 });
-                console.log(response.data.user_role);
-
-                if (response.data.user_role === undefined ) {
-                    alert('Message: Login First');
-                  
+            } catch (error) {
+                if (error.response.status === 403) {
+                    alert(`Message: ${error.response.data}`)
                     navigate({
-                        pathname: '/login'
+                        pathname: '/Login'
                     });
                 }
-            } catch (error) {
-                console.error('Error fetching data:', error);
             }
         };
 
@@ -39,7 +35,7 @@ import axios from 'axios';
     }, [navigate]);
 
 
-  
+
 
     const complete_profile = {
         personal_photo: null,
@@ -86,10 +82,35 @@ import axios from 'axios';
         }
     }
 
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        let response 
+        if (role === 'Student') {
+            response = await axios.post('/api/complete_profile/', {
+                personal_photo: form.personal_photo,
+                academic_year: form.academic_year,
+                study_field: form.study_field,
+                parent_name: form.parent_name,
+                parent_phone_number: form.parent_phone_number,
+            })
+
+            console.log(response)
+            
+
+        } else {
+            response = await axios.post('/api/complete_profile/', {
+                personal_photo: form.personal_photo,
+                National_ID_photo: form.National_ID_photo
+            })
+            console.log(response)
+        }
+    }
+
+
     return (
         <div className="container">
 
-            <form className='complete-profile'>
+            <form className='complete-profile' onSubmit={handleSubmit}>
                 <div className='header'>
                     <p className='texts'>Complete Profile</p>
                     <div className="underline"></div>
@@ -195,9 +216,12 @@ import axios from 'axios';
                 ) : <></>
                 }
                 <div className="submit">
-                    <button>Skip</button>
-                    <button>Submit</button>
+                    {/* 
+                we will skip this skip for now
+                <button type='button'>Skip</button> 
+                */}
 
+                    <button type='submit'>Submit</button>
                 </div>
 
             </form>
