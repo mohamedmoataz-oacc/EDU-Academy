@@ -52,7 +52,8 @@ def student_complete_profile(request):
     ).save()
     return Response({"detail":"Student completed profile successfully",
                      "user_role":request.user.user_role.role,
-                     "redirect_to":reverse("api:view_profile",args=(request.user.username,))})
+                     "username":request.user.username,
+                     "redirect_to":"/Profile"})
 
 def assistant_complete_profile(request):
     serializer = AssistantProfileSerializer(data=request.data)

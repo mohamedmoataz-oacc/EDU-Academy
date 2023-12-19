@@ -58,8 +58,7 @@ const CompleteProfile = () => {
             const file = e.target.files[0];
             if (file) {
                 if (file.type.startsWith('image/')) {
-                    setForm({ ...form, [e.target.name]: e.target.value });
-                    console.log(e.target.value)
+                    setForm({ ...form, [e.target.name]: file });
                     setPersonalValid(true);
                 } else {
                     setPersonalValid(false);
@@ -69,41 +68,64 @@ const CompleteProfile = () => {
             const file = e.target.files[0];
             if (file) {
                 if (file.type.startsWith('image/')) {
-                    setForm({ ...form, [e.target.name]: e.target.value });
-                    console.log(e.target.value)
+                    setForm({ ...form, [e.target.name]: file });
                     setNationalValid(true);
                 } else {
                     setNationalValid(false);
                 }
             }
-        }
-        else {
+        } else {
             setForm({ ...form, [e.target.name]: e.target.value });
         }
     }
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        let response 
-        if (role === 'Student') {
-            response = await axios.post('/api/complete_profile/', {
-                personal_photo: form.personal_photo,
-                academic_year: form.academic_year,
-                study_field: form.study_field,
-                parent_name: form.parent_name,
-                parent_phone_number: form.parent_phone_number,
-            })
 
-            console.log(response)
-            
+        const formData = new FormData();
+        const csrfToken = document.cookie
+            .split('; ')
+            .find((row) => row.startsWith('csrftoken='))
+            .split('=')[1];
+
+
+        let response;
+        formData.append('personal_photo', form.personal_photo);
+        if (role === 'Student') {
+
+            formData.append('academic_year', form.academic_year);
+            formData.append('study_field', form.study_field);
+            formData.append('parent_name', form.parent_name);
+            formData.append('parent_phone_number', form.parent_phone_number);
+
 
         } else {
-            response = await axios.post('/api/complete_profile/', {
-                personal_photo: form.personal_photo,
-                National_ID_photo: form.National_ID_photo
-            })
-            console.log(response)
+            formData.append('National_ID_photo', form.National_ID_photo);
         }
+
+
+        try {
+            response = await axios.post('/api/complete_profile/', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                    'X-CSRFToken': csrfToken
+                },
+            });
+
+            if (response.status === 200) {
+                let resp_json = response.data
+                alert('Messgae: ' + resp_json.message);
+                navigate({
+                    pathname: `${resp_json.redirect_to}`,
+                    search: `?role=${resp_json.user_role}&username=${resp_json.username}`, // Pass user_role as a query parameter
+                });
+            }
+
+
+        } catch (error) {
+            alert('there is a proplem try again correctly')
+        }
+
     }
 
 
@@ -196,25 +218,27 @@ const CompleteProfile = () => {
                     <></>
 
                 }
-                <div className='center upload'>
+                <div class='center upload'>
                     <span>Personal photo</span>
-                    <label htmlFor="personal" className={!personalValid ? 'invalid' : ''}>upload photo
+                    <label for="personal" class={!personalValid ? 'invalid' : ''}>
+                        Upload photo
                         <span><FiUpload /></span>
                     </label>
-                    <input type="file" id="personal" accept="image/*" name="personal_photo" value={form.personal_photo} onChange={handleChange} required />
-                    {!personalValid && <div style={{ color: 'red' }}>Invalid file type. Please select an image.</div>}
+                    <input type="file" id="personal" accept="image/*" name="personal_photo" onChange={handleChange} required />
+                    {!personalValid && <div style="color: red;">Invalid file type. Please select an image.</div>}
                 </div>
+
                 {role !== 'Student' ? (
-                    <div className='center upload'>
+                    <div class='center upload'>
                         <span>NationalID photo</span>
-                        <label htmlFor="national" className={!nationalValid ? 'invalid' : ''}>upload photo
+                        <label for="national" class={!nationalValid ? 'invalid' : ''}>
+                            Upload photo
                             <span><FiUpload /></span>
                         </label>
-                        <input type="file" id="national" accept="image/*" name="National_ID_photo" value={form.personal_photo} onChange={handleChange} required />
-                        {!nationalValid && <div style={{ color: 'red' }}>Invalid file type. Please select an image.</div>}
+                        <input type="file" id="national" accept="image/*" name="National_ID_photo" onChange={handleChange} required />
+                        {!nationalValid && <div style="color: red;">Invalid file type. Please select an image.</div>}
                     </div>
-                ) : <></>
-                }
+                ) : ''}
                 <div className="submit">
                     {/* 
                 we will skip this skip for now
