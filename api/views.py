@@ -123,8 +123,8 @@ def complete_profile(request):
 ###################
     
 @login_required
-@api_view(['GET'])
 @user_passes_test(profile_is_completed, login_url="/api/complete_profile/")
+@api_view(['GET'])
 def view_profile(request, username=None):
     if username is None:
         return redirect("api:view_profile", username=request.user.username)
@@ -152,8 +152,8 @@ def view_profile(request, username=None):
 #############
 
 @login_required
-@api_view(['GET'])
 @user_passes_test(profile_is_completed, login_url="/api/complete_profile/")
+@api_view(['GET'])
 def home(request):
     user = request.user
     return roles_to_actions[user.user_role.role]["home"](user)
@@ -165,8 +165,9 @@ def home(request):
 # REMEMBER TO REMOVE PARTIAL
 
 @login_required
-@api_view(['GET', 'POST'])
 @user_passes_test(profile_is_completed, login_url="/api/complete_profile/")
+@ensure_csrf_cookie
+@api_view(['GET', 'POST'])
 def create_course(request):
     if not is_accepted_teacher(request.user):
         return Response(status=status.HTTP_401_UNAUTHORIZED)
@@ -210,8 +211,9 @@ def view_course(request, course_id:int):
 ##################
 
 @login_required
-@api_view(['GET', 'POST'])
 @user_passes_test(profile_is_completed, login_url="/api/complete_profile/")
+@ensure_csrf_cookie
+@api_view(['GET', 'POST'])
 def create_lecture(request, course_id:int = None):
     if not is_accepted_teacher(request.user):
         return Response(status=status.HTTP_401_UNAUTHORIZED)
@@ -285,7 +287,7 @@ def get_courses(request, fields:str = "", subset=None):
             "is_completed": course.completed,
             "teacher": User.objects.get(pk=course.teacher.pk).first_name + " " +
                        User.objects.get(pk=course.teacher.pk).last_name,
-            # "thumbnail": course.thumbnail,
+            "thumbnail": f"media/{course.thumbnail}",
             "subject": course.subject.subject_name,
         } for course in all_courses
     ]

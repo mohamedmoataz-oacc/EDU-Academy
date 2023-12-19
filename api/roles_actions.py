@@ -2,7 +2,7 @@
 Contains functions for the actions that are different between user roles.
 """
 
-from django.shortcuts import redirect
+from django.shortcuts import redirect, get_object_or_404
 from django.urls import reverse
 from django.db.models import Avg
 from rest_framework.response import Response
@@ -15,21 +15,19 @@ from .views_checks import *
 # Otherwise, `request.FILES` will be empty.
 
 
-# REMEMBER TO REMOVE PARTIAL
-
 ######################
 # Profile completion #
 ######################
 
 def teacher_complete_profile(request):
-    serializer = TeacherProfileSerializer(data=request.data, partial=True)
+    serializer = TeacherProfileSerializer(data=request.data)
     if serializer.is_valid(raise_exception=True):
         data = serializer.data
     
     teacher = Teacher.objects.create(
         teacher = request.user,
-        # personal_photo = data['personal_photo'],
-        # national_ID_photo = data['national_ID_photo'],
+        personal_photo = data['personal_photo'],
+        national_ID_photo = data['national_ID_photo'],
     )
     teacher.save()
     TeachRequest.objects.create(teacher=teacher).save()
@@ -51,14 +49,14 @@ def student_complete_profile(request):
     return redirect("api:view_profile", username=request.user.username)
 
 def assistant_complete_profile(request):
-    serializer = AssistantProfileSerializer(data=request.data, partial=True)
+    serializer = AssistantProfileSerializer(data=request.data)
     if serializer.is_valid(raise_exception=True):
         data = serializer.data
     
     Assistant.objects.create(
         assistant=request.user,
-        # personal_photo = data['personal_photo'],
-        # national_ID_photo = data['national_ID_photo'],
+        personal_photo = data['personal_photo'],
+        national_ID_photo = data['national_ID_photo'],
     ).save()
     return redirect("api:view_profile", username=request.user.username)
 
@@ -73,8 +71,8 @@ def teacher_view_profile(user, user_profile: dict, view_self):
         {
             "balance" : teacher.balance if view_self else None,
             "accepted" : teacher.accepted,
-            "personal_photo" : teacher.personal_photo,
-            "national_ID_photo" : teacher.national_ID_photo if view_self else None,
+            "personal_photo" : str(teacher.personal_photo),
+            "national_ID_photo" : str(teacher.national_ID_photo) if view_self else None,
         }
     )
     return Response(user_profile)
@@ -91,7 +89,7 @@ def student_view_profile(user, user_profile: dict, view_self):
             "points" : student.points if view_self else None,
             "balance" : student.balance if view_self else None,
             "verified" : student.verified if view_self else None,
-            "personal_photo" : student.personal_photo if student.personal_photo else None,
+            "personal_photo" : str(student.personal_photo) if student.personal_photo else None,
             "badges" : [badge.badge_name for badge in badges_list]
         }
     )
@@ -101,8 +99,8 @@ def assistant_view_profile(user, user_profile: dict, view_self):
     assistant = Assistant.objects.get(assistant=user)
     user_profile.update(
         {
-            "personal_photo" : assistant.personal_photo,
-            "national_ID_photo" : assistant.national_ID_photo if view_self else None,
+            "personal_photo" : str(assistant.personal_photo),
+            "national_ID_photo" : str(assistant.national_ID_photo) if view_self else None,
         }
     )
     return Response(user_profile)
@@ -127,7 +125,7 @@ def student_home(user):
             "is_completed": course.completed,
             "teacher": User.objects.get(pk=course.teacher.pk).first_name + " " +
                        User.objects.get(pk=course.teacher.pk).last_name,
-            # "thumbnail": course.thumbnail,
+            "thumbnail" : f"media/{course.thumbnail}",
             "subject": course.subject.subject_name,
         } for course in courses
     ]
@@ -157,7 +155,7 @@ def teacher_my_courses(user):
             "description": course.description,
             "is_completed": course.completed,
             "creation_date": course.creation_date.date(),
-            # "thumbnail": course.thumbnail,
+            "thumbnail" : f"media/{course.thumbnail}",
             "subject": course.subject.subject_name,
         } for course in courses
     ]
@@ -175,7 +173,7 @@ def student_my_courses(user):
             "enrolled_date": Enrollment.objects.get(course=course, student=student).start_date.date(),
             "teacher": User.objects.get(pk=course.teacher.pk).first_name + " " +
                        User.objects.get(pk=course.teacher.pk).last_name,
-            # "thumbnail": course.thumbnail,
+            "thumbnail" : f"media/{course.thumbnail}",
             "subject": course.subject.subject_name,
         } for course in courses
     ]
@@ -193,7 +191,7 @@ def assistant_my_courses(user):
             "assisting_date": Assisting.objects.get(course=course, assistant=assistant).start_date.date(),
             "teacher": User.objects.get(pk=course.teacher.pk).first_name + " " +
                        User.objects.get(pk=course.teacher.pk).last_name,
-            # "thumbnail": course.thumbnail,
+            "thumbnail" : f"media/{course.thumbnail}",
             "subject": course.subject.subject_name,
         } for course in courses
     ]
@@ -204,7 +202,7 @@ def assistant_my_courses(user):
 ###############
 
 def get_basic_course_info(course_id:int):
-    course = Course.objects.get(pk=course_id)
+    course = get_object_or_404(Course, pk=course_id)
     info = {
         "course_name" : course.course_name,
         "teacher" : {
@@ -227,7 +225,7 @@ def get_basic_course_info(course_id:int):
         "description" : course.description,
         "lecture_price" : course.lecture_price,
         "package_size" : course.package_size,
-        # "thumbnail" : course.thumbnail,
+        "thumbnail" : f"media/{course.thumbnail}",
         "creation_date" : course.creation_date,
         "completed" : course.completed,
         "rating" : CourseRating.objects.filter(course=course).aggregate(avg_rating=Avg('rating'))['avg_rating']

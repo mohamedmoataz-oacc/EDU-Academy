@@ -141,7 +141,7 @@ class Course(models.Model):
     description = models.TextField()
     lecture_price = models.PositiveIntegerField()
     package_size = models.PositiveSmallIntegerField()
-    thumbnail = models.ImageField(null=True, blank=True)
+    thumbnail = models.ImageField(null=True, blank=True, upload_to="courses_thumbnails/")
     creation_date = models.DateTimeField(auto_now_add=True)
     completed = models.BooleanField(default=False)
 

@@ -1,12 +1,8 @@
 .venv
 .vscode
 .EDU-Academy-Venv
-.venv 
 /eduacademy_frontend/node_modules/
 /eduAcademy/__pycache__/
 /api/__pycache__/
-/api/migrations/
-.vscode/settings.json
-.venv
-.vscode
+/api/migrations/__pycache__/
 db.sqlite3
