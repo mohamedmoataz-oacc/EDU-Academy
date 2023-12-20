@@ -116,12 +116,12 @@ const Auth = () => {
 
 
                     if (resp_json.redirect_to === undefined) {
-                        alert(resp_json.message)
+                        alert(resp_json.detail)
                         navigate({
                             pathname: `/Home`
                         });
                     } else {
-                        alert(resp_json.message)
+                        alert(resp_json.detail)
                         navigate({
                             pathname: `${resp_json.redirect_to}`,
                             search: `?role=${resp_json.user_role}`, // Pass user_role as a query parameter
