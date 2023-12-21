@@ -22,12 +22,11 @@ const CompleteProfile = () => {
             try {
                 const response = await axios.get('/api/complete_profile/', { maxRedirects: 0 });
             } catch (error) {
-                if (error.response.status === 403) {
                     alert(`Message: ${error.response.data}`)
                     navigate({
                         pathname: '/Login'
                     });
-                }
+                
             }
         };
 
@@ -39,7 +38,7 @@ const CompleteProfile = () => {
 
     const complete_profile = {
         personal_photo: null,
-        National_ID_photo: null,
+        national_ID_photo: null,
         academic_year: null,
         study_field: null,
         parent_name: "",
@@ -64,7 +63,7 @@ const CompleteProfile = () => {
                     setPersonalValid(false);
                 }
             }
-        } else if (e.target.type === "file" && e.target.name === 'National_ID_photo') {
+        } else if (e.target.type === "file" && e.target.name === 'national_ID_photo') {
             const file = e.target.files[0];
             if (file) {
                 if (file.type.startsWith('image/')) {
@@ -101,7 +100,7 @@ const CompleteProfile = () => {
             }
 
         } else {
-            formData.append('National_ID_photo', form.National_ID_photo);
+            formData.append('national_ID_photo', form.national_ID_photo);
         }
 
 
@@ -236,7 +235,7 @@ const CompleteProfile = () => {
                             Upload photo
                             <span><FiUpload /></span>
                         </label>
-                        <input type="file" id="national" accept="image/*" name="National_ID_photo" onChange={handleChange} required />
+                        <input type="file" id="national" accept="image/*" name="national_ID_photo" onChange={handleChange} required />
                         {!nationalValid && <div style="color: red;">Invalid file type. Please select an image.</div>}
                     </div>
                 ) : ''}

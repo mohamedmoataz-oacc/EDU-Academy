@@ -118,7 +118,8 @@ const Auth = () => {
                     if (resp_json.redirect_to === undefined) {
                         alert(resp_json.detail)
                         navigate({
-                            pathname: `/Home`
+                            pathname: `/Profile`,
+                            search: `?role=${resp_json.user_role}&username=${form.username}`
                         });
                     } else {
                         alert(resp_json.detail)

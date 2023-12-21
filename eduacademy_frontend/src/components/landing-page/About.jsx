@@ -14,7 +14,7 @@ export const About = () => {
     <>
     <div className='container cont1'>
         <div className='p1'>
-            <h1>Welcome to, Edu Academy</h1>
+            <h1>Welcome to, EDU Academy</h1>
             <p>where learning knows no bounds! Access high-quality courses offered by educators spanning every corner of Egypt, while students earn points for unlocking additional content. Engage, learn, and grow within a community that values your feedback about courses andteachers and enjoy your first class on us!</p>
             <button className='join-us btn'>Join us now !</button>
         </div>
