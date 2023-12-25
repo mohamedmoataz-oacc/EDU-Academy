@@ -4,7 +4,8 @@ from django.contrib.auth import authenticate, login, logout
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.urls import reverse
 from django.db import DatabaseError, transaction
-from django.db.models import F
+from django.db.models import F, Value as V
+from django.db.models.functions import Concat
   
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -440,3 +441,56 @@ def get_courses(request, fields:str = "", subset=None):
         } for course in all_courses
     ]
     return Response(filtered_courses)
+
+
+################
+# Get subjects #
+################
+
+@api_view(['GET'])
+def get_subjects(request):
+    subjects =  {"Subjects": Subject.objects.all()}
+    return Response(subjects)
+
+
+##################
+# Courses search #
+##################
+
+@api_view(['GET'])
+def search_course(request, name):
+    courses_matched = Course.objects.filter(course_name__icontains=name)
+    courses = [
+        {
+            "id": course.id,
+            "name": course.course_name,
+            "description": course.description,
+            "is_completed": course.completed,
+            "teacher": User.objects.get(pk=course.teacher.pk).first_name + " " +
+                       User.objects.get(pk=course.teacher.pk).last_name,
+            "thumbnail": f"media/{course.thumbnail}",
+            "subject": course.subject.subject_name,
+        } for course in courses_matched
+    ]
+    return Response(courses)
+
+
+###################
+# Teachers search #
+###################
+
+@api_view(['GET'])
+def search_teacher(request, name):
+    teachers_matched = Teacher.objects.annotate(
+        full_name = Concat('teacher__first_name', V(' '), 'teacher__last_name')
+    )
+
+    teachers_matched = teachers_matched.filter(teacher__full_name__icontains=name)
+    teachers = [
+        {
+            "personal_photo" : str(teacher.personal_photo),
+            "name": teacher.full_name,
+            "subjects": [i.subject_name for i in teacher.subject_set.all()],
+        } for teacher in teachers_matched
+    ]
+    return Response(teachers)

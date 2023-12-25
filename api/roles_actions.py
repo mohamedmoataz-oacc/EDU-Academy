@@ -27,10 +27,13 @@ def teacher_complete_profile(request):
         national_ID_photo = data['national_ID_photo'],
     )
     TeachRequest.objects.create(teacher=teacher).save()
-    return Response({"detail":"Teacher completed profile successfully",
-                     "user_role":request.user.user_role.role,
-                     "username":request.user.username,
-                     "redirect_to":"/Profile"})
+    return Response({
+            "detail":"Teacher completed profile successfully",
+            "user_role":request.user.user_role.role,
+            "username":request.user.username,
+            "redirect_to":"/Profile"
+        }
+    )
 
 def student_complete_profile(request):
     serializer = StudentProfileSerializer(data=request.data)
@@ -45,10 +48,13 @@ def student_complete_profile(request):
         parent_phone_number = data['parent_phone_number'],
         personal_photo = data.get('personal_photo'),
     )
-    return Response({"detail":"Student completed profile successfully",
-                     "user_role":request.user.user_role.role,
-                     "username":request.user.username,
-                     "redirect_to":"/Profile"})
+    return Response({
+            "detail":"Student completed profile successfully",
+            "user_role":request.user.user_role.role,
+            "username":request.user.username,
+            "redirect_to":"/Profile"
+        }
+    )
 
 def assistant_complete_profile(request):
     serializer = AssistantProfileSerializer(data=request.data)
@@ -60,10 +66,13 @@ def assistant_complete_profile(request):
         personal_photo = data['personal_photo'],
         national_ID_photo = data['national_ID_photo'],
     )
-    return Response({"detail":"Assistant completed profile successfully",
-                     "user_role":request.user.user_role.role,
-                     "username":request.user.username,
-                     "redirect_to":"/Profile"})
+    return Response({
+            "detail":"Assistant completed profile successfully",
+            "user_role":request.user.user_role.role,
+            "username":request.user.username,
+            "redirect_to":"/Profile"
+        }
+    )
 
 
 ###################
@@ -109,41 +118,6 @@ def assistant_view_profile(user, user_profile: dict, view_self):
         }
     )
     return Response(user_profile)
-
-
-########
-# Home #
-########
-
-# def teacher_home(user):
-#     return Response("Home Page")
-
-# def student_home(user):
-#     enrolled_courses = student_my_courses(user)
-#     student = Student.objects.get(student=user)
-#     courses = Course.objects.all().difference(student.course_set.all())[:20]
-
-#     not_enrolled_courses = [
-#         {
-#             "name": course.course_name,
-#             "description": course.description,
-#             "is_completed": course.completed,
-#             "teacher": User.objects.get(pk=course.teacher.pk).first_name + " " +
-#                        User.objects.get(pk=course.teacher.pk).last_name,
-#             "thumbnail" : f"media/{course.thumbnail}",
-#             "subject": course.subject.subject_name,
-#         } for course in courses
-#     ]
-
-#     output = {
-#         "enrolled_courses": enrolled_courses,
-#         "not_enrolled_courses": not_enrolled_courses,
-#     }
-
-#     return Response(output)
-
-# def assistant_home(user):
-#     return Response("Home Page")
 
 
 ##############
@@ -343,17 +317,29 @@ def get_lecture_content(lecture):
 
 def teacher_view_lecture(user, lecture):
     if not teacher_created_course(user, lecture.course.pk):
-        return Response(status=status.HTTP_401_UNAUTHORIZED)
+        return Response({
+                "detail": "Teacher must own the course to be able to view its lectures."
+            },
+            status=status.HTTP_401_UNAUTHORIZED
+        )
     return Response(get_lecture_content(lecture))
 
 def student_view_lecture(user, lecture):
     if not student_bought_lecture(user, lecture):
-        return Response(status=status.HTTP_402_PAYMENT_REQUIRED)
+        return Response({
+                "detail": "Student must buy the lecture to be able to view it."
+            },
+            status=status.HTTP_402_PAYMENT_REQUIRED
+        )
     return Response(get_lecture_content(lecture))
 
 def assistant_view_lecture(user, lecture):
     if not assistant_assisting_in_course(user, lecture.course.pk):
-        return Response(status=status.HTTP_401_UNAUTHORIZED)
+        return Response({
+                "detail": "Assistant must be assisting in course to be able to view its lectures."
+            },
+            status=status.HTTP_401_UNAUTHORIZED
+        )
     return Response(get_lecture_content(lecture))
 
 ####################
@@ -364,7 +350,6 @@ roles_to_actions = {
     "Teacher": {
         "completion": teacher_complete_profile,
         "viewing": teacher_view_profile,
-        # "home": teacher_home,
         "my_courses": teacher_my_courses,
         "view_course": teacher_view_course,
         "view_lecture": teacher_view_lecture,
@@ -372,7 +357,6 @@ roles_to_actions = {
     "Student": {
         "completion": student_complete_profile,
         "viewing": student_view_profile,
-        # "home": student_home,
         "my_courses": student_my_courses,
         "view_course": student_view_course,
         "view_lecture": student_view_lecture,
@@ -380,7 +364,6 @@ roles_to_actions = {
     "Assistant": {
         "completion": assistant_complete_profile,
         "viewing": assistant_view_profile,
-        # "home": assistant_home,
         "my_courses": assistant_my_courses,
         "view_course": assistant_view_course,
         "view_lecture": assistant_view_lecture,
