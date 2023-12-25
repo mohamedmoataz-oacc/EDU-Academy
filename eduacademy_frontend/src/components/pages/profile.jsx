@@ -79,9 +79,11 @@ const Profile = () => {
 
 
   return (
-    <div>
+    <div className="profile-container">
       <div className='info'>
-        <p><span className='strong'>Personal Photo </span> <img src={user_data.personal_photo} alt="personal photo" /></p>
+      <div className="profile-picture">
+          <img src={user_data.personal_photo} alt="Personal Photo" />
+        </div>        
         <p><span className='strong'>User Name </span> {user_data.username}</p>
         <p><span className='strong'>Name </span> {user_data.firstname + " " + user_data.lastname}</p>
         <p><span className='strong'>Governerate </span> {user_data.governorate}</p>

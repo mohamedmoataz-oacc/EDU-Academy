@@ -113,7 +113,7 @@ a.active .Link::after{
   width:100%;
   align-items: center;
   justify-content: center;
-  top:100px;
+  top:70px;
   padding-bottom:20px;
 }
 .p1{
@@ -377,9 +377,8 @@ h6, h5{
  justify-content: left;
  justify-content: center;
  align-items: center;
- background: linear-gradient(to right, #f76697, #3429fc);
- box-shadow: 3px 10px 37px 10px rgba(0,0,0,0.86);
-
+ background: linear-gradient(to top right, #7fd9f1 0% , #a460f6 60% , #f98da7 100%);
+ box-shadow: 3px 10px 37px 10px rgba(0,0,0,0.5);
 }
 
 .user-container .user{
@@ -435,15 +434,30 @@ h6, h5{
   flex-direction: column;
 }
 .courses{
-  margin:50px;
+  width: 100%;
+  margin-top: 3rem;
   display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+
+
+.get-courses{
+  padding: 4rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   flex-direction: column;
+  padding-top: 200px;
 }
 .courses .st{
   display: flex;
+  flex-direction: row;
 }
 .course{
-  width:50%;
+  width:40%;
   background-color: #fcfcfc;
   position:relative;
   padding:20px;
@@ -452,12 +466,14 @@ h6, h5{
   display: grid;
   border: 1px solid var(--border);
   border-radius: 8px;
+  height: 50vh;
 }
 .course-info{
-  margin: 70px;
+  margin: 40px;
   font-size: large;
   color:#0c0762;
 }
+
 .course-info *{
   margin-bottom: 10px;
 }
@@ -499,13 +515,13 @@ h6, h5{
 
 .lecture{
   background-color: #fcfcfc;
-  padding:20px 40px;
+  padding:20px 150px;
   border: 1px solid var(--border);
   margin:10px 30px;
   border-radius: 5px;
   font-family: PolySans ,'Open Sans' ,sans-serif;
   display:flex;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
 }
 .lecture h2{
@@ -538,26 +554,27 @@ h6, h5{
   margin:20px;
 }
 .wrapper{
-  width:80%;
+  width:100%;
   display: flex;
   align-items: center;
   justify-content: center;
   padding:20px;
+  margin-top: 50px;
 }
 
 .wrapper textarea{
-  width: 80%;
-  height:30px;
+  width: 50%;
+  height:60px;
   resize:none;
   outline: none;
-  padding:15px;
+  padding:20px;
   border-radius: 5px;
   font-size: 16px;
   overflow-y: hidden;
 }
 
 .wrapper button{
-  height:40px;
+  height:50px;
   margin-left: 20px;
   background-color: #150dab;
   color: #f4f4f4;
@@ -605,13 +622,13 @@ h6, h5{
 }
 .upload input{
   position: absolute;
-  top: 0;
-  left: 0;
+  visibility: hidden;
   font-size: 100px;
   opacity: 0;
   cursor: pointer;
   
 }
+
 .upload span {
   display: inline-block;
   margin-left: 10px;
@@ -644,6 +661,246 @@ h6, h5{
   margin:10px;
   font-size: 20px;
 }
-.info p .strong{
+.strong{
   font-weight: 600;
+}
+
+.U-container{
+  margin-top: 200px;
+}
+
+.teacherp{
+  padding: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.teacherp .great{
+  padding: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  padding:50px;
+}
+.teacherp .great h1{
+  margin:0 10px 10px 0;
+  color: #0a0651;
+}
+.teacherp .great p{
+  font-size: 20px;
+  text-align: center;
+}
+
+.teacherp button{
+  padding:18px;
+  background-color: #150dab;
+  color: #fefefe;
+  outline: none;
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  margin-top: 80px;
+  box-shadow: 2px 2px 4px #000000;
+}
+
+.teacherp button:hover{
+  background-color: #0f0a7a;
+  cursor: pointer;
+  
+}
+.package_size{
+  width:100%;
+  display: flex;
+  align-items: center;
+  
+}
+
+.package_size input{
+  width:65px;
+  margin-left: 20px;
+  padding: 5px 10px;
+  border-radius: 5px;
+  outline: none;
+  border: 2px solid #a9b0b6;
+}
+
+.package_size input:focus,
+.package_size input:valid{
+  border:2px solid #2015ff;
+}
+
+.create_course{
+  border-radius: 10px;
+  gap: 20px;
+}
+
+#left{
+  padding-left: 0;
+  margin-left: 0;
+}
+
+
+.tab{
+  padding-bottom: 50px;
+  margin-left: 50px;
+}
+.course-description{
+  width:auto;
+  padding:20px;
+  margin:100px 80px 20px;
+  border: 2px solid #a9b0b6;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap:80px;
+}
+
+.course-description .gap *{
+  margin-bottom: 10px;
+}
+
+.lectures{
+  padding-bottom: 50px;
+}
+
+.QA{
+  margin-left: 50px;
+}
+
+.QA .answers{
+  margin-left: 20px;
+  margin-bottom: 10px;
+  gap:10px;
+}
+
+.QA .question{
+  margin:20px 0;
+}
+
+.QA li{
+  list-style-type: none;
+}
+
+table {
+  width:80%;
+  border-collapse: collapse;
+  margin:50px;
+}
+
+th, td {
+  border: 1px solid #cbcbcb;
+  padding: 12px;
+  text-align: left;
+}
+
+th {
+  background-color: #e3e2e2;
+}
+
+tr:hover {
+  background-color: #e3e2e2;
+}
+
+a {
+  color: #3498db;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+
+.profile-container {
+  max-width: 800px;
+  margin: 5px auto;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  padding: 5px 200px;
+  box-sizing: border-box;
+  
+}
+
+.profile-picture {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  overflow: hidden;
+  margin-bottom: 80px;
+  margin-left: 150px;
+  border:2px solid #a9b0b6;
+
+}
+
+.profile-picture img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+
+}
+
+.profile-details {
+  text-align: left;
+}
+
+.profile-details p {
+  margin-bottom: 10px;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 10px;
+  color:#011751;
+
+}
+
+.profile-details p:hover{
+  color: #076edd;
+}
+
+
+select {
+  /* General styling */
+  appearance: none; /* Remove default styling */
+  background-color: #fff; /* White background */
+  border: 1px solid #ccc; /* Gray border */
+  border-radius: 5px; /* Rounded corners */
+  padding: 10px 15px; /* Padding for text */
+  font-size: 14px; /* Font size */
+  width: 200px; /* Adjust width as needed */
+  cursor: pointer; /* Hand cursor on hover */
+  margin-right: 10px;
+
+  /* Hover state */
+  &:hover {
+    border-color: #999; /* Darker border on hover */
+  }
+
+  /* Arrow icon for dropdown */
+  background-image: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23333'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 12px;
+}
+
+/* Option styling */
+option {
+  background-color: #fff; /* White background for options */
+  color: #333; /* Black text color */
+  padding: 10px; /* Padding for options */
+}
+
+.get-courses input[type="checkbox"] {
+  /* General styling */
+  
+  width: 20px; /* Adjust size as needed */
+  height: 20px;
+  border: 2px solid #ccc; /* Gray border */
+  border-radius: 5px; /* Rounded corners */
+  cursor: pointer; /* Hand cursor on hover */
+  margin-left: 15px;
+}
+
+.get-courses label{
+  padding: 10px;
 }
