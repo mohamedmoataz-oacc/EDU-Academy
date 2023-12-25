@@ -17,9 +17,11 @@ from .models import *
 ######################
 
 def teacher_complete_profile(request):
-    serializer = TeacherProfileSerializer(data=request.data)
-    if serializer.is_valid(raise_exception=True):
-        data = serializer.data
+    data = {**request.data, **request.FILES}
+    data = {i:j[0] if isinstance(j, list) else j for i, j in data.items()}
+
+    serializer = TeacherProfileSerializer(data=data)
+    serializer.is_valid(raise_exception=True)
     
     teacher = Teacher.objects.create(
         teacher = request.user,
@@ -36,9 +38,11 @@ def teacher_complete_profile(request):
     )
 
 def student_complete_profile(request):
-    serializer = StudentProfileSerializer(data=request.data)
-    if serializer.is_valid(raise_exception=True):
-        data = serializer.data
+    data = {**request.data, **request.FILES}
+    data = {i:j[0] if isinstance(j, list) else j for i, j in data.items()}
+
+    serializer = StudentProfileSerializer(data=data)
+    serializer.is_valid(raise_exception=True)
     
     Student.objects.create(
         student=request.user,
@@ -57,7 +61,10 @@ def student_complete_profile(request):
     )
 
 def assistant_complete_profile(request):
-    serializer = AssistantProfileSerializer(data=request.data)
+    data = {**request.data, **request.FILES}
+    data = {i:j[0] if isinstance(j, list) else j for i, j in data.items()}
+
+    serializer = AssistantProfileSerializer(data=data)
     if serializer.is_valid(raise_exception=True):
         data = serializer.data
     
@@ -66,6 +73,7 @@ def assistant_complete_profile(request):
         personal_photo = data['personal_photo'],
         national_ID_photo = data['national_ID_photo'],
     )
+
     return Response({
             "detail":"Assistant completed profile successfully",
             "user_role":request.user.user_role.role,

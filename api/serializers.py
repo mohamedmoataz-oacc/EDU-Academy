@@ -52,6 +52,7 @@ class CourseCreationSerializer(serializers.ModelSerializer):
         return subject[0].pk
     
 class LectureCreationSerializer(serializers.ModelSerializer):
+    video = serializers.FileField(use_url=False)
     class Meta:
         model = Lecture
         fields = ('lecture_title','video')

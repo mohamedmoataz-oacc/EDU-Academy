@@ -207,9 +207,12 @@ def create_course(request):
     if request.method == 'GET':
         return Response()
     elif request.method == 'POST':
-        serializer = CourseCreationSerializer(data=request.data)
-        if serializer.is_valid(raise_exception=True):
-            data = serializer.data
+        data = {**request.data, **request.FILES}
+        data = {i:j[0] if isinstance(j, list) else j for i, j in data.items()}
+
+        serializer = CourseCreationSerializer(data=data)
+        serializer.is_valid(raise_exception=True)
+
         Course.objects.create(
             teacher = Teacher.objects.get(teacher=request.user),
             subject = Subject.objects.get(pk=data['subject']),
@@ -261,12 +264,15 @@ def create_lecture(request, course_id:int = None):
     
     course = Course.objects.filter(teacher=Teacher.objects.get(teacher=request.user), pk=course_id)
     if not course.count():
-        return Response({"detail": "Teacher is trying to create a lecture in other teacher course"},
+        return Response({"detail": "Teacher is trying to create a lecture in other teacher course or an inexistent course"},
                         status=status.HTTP_401_UNAUTHORIZED)
     if request.method == 'POST':
-        serializer = LectureCreationSerializer(data=request.data)
-        if serializer.is_valid(raise_exception=True):
-            data = serializer.data
+        data = {**request.data, **request.FILES}
+        data = {i:j[0] if isinstance(j, list) else j for i, j in data.items()}
+
+        serializer = LectureCreationSerializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        
         Lecture.objects.create(
             course = course[0],
             lecture_title = data['lecture_title'],

@@ -44,7 +44,7 @@ female_names = [
 
 genders = ["M", "F"]
 
-roles = ["Admin", "Student", "Teacher", "Assistant"]
+roles = ["Teacher", "Student", "Assistant", "Admin"]
 
 subjects = ["Arabic", "Math", "English", "French"]
 
