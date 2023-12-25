@@ -2,7 +2,7 @@
 Contains functions for the actions that are different between user roles.
 """
 
-from django.shortcuts import redirect, get_object_or_404
+from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django.db.models import Avg
 from rest_framework.response import Response
@@ -10,11 +10,6 @@ from rest_framework import status
 from .serializers import *
 from .views_checks import *
 from .models import *
-
-# Note that `request.FILES` will only contain data if the request method was POST,
-# at least one file field was actually posted,
-# and the <form> that posted the request has the attribute enctype="multipart/form-data".
-# Otherwise, `request.FILES` will be empty.
 
 
 ######################
@@ -31,7 +26,6 @@ def teacher_complete_profile(request):
         personal_photo = data['personal_photo'],
         national_ID_photo = data['national_ID_photo'],
     )
-    teacher.save()
     TeachRequest.objects.create(teacher=teacher).save()
     return Response({"detail":"Teacher completed profile successfully",
                      "user_role":request.user.user_role.role,
@@ -50,7 +44,7 @@ def student_complete_profile(request):
         parent_name = data['parent_name'],
         parent_phone_number = data['parent_phone_number'],
         personal_photo = data.get('personal_photo'),
-    ).save()
+    )
     return Response({"detail":"Student completed profile successfully",
                      "user_role":request.user.user_role.role,
                      "username":request.user.username,
@@ -65,7 +59,7 @@ def assistant_complete_profile(request):
         assistant=request.user,
         personal_photo = data['personal_photo'],
         national_ID_photo = data['national_ID_photo'],
-    ).save()
+    )
     return Response({"detail":"Assistant completed profile successfully",
                      "user_role":request.user.user_role.role,
                      "username":request.user.username,
