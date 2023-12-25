@@ -15,8 +15,8 @@ const Profile = () => {
   const userdata = {
     view_self : true,
     username : "",
-    firstname : "",
-    lastname : "",
+    first_name : "",
+    last_name : "",
     governorate : "",
     email : "",
     date_joined : "" ,
@@ -38,38 +38,18 @@ const Profile = () => {
 
   const [user_data, setUserData] = useState(userdata);
 
-  user_data.username = usernameParamter ; 
-  user_data.user_role = roleParamter ; 
 
   useEffect(() => {
     const fetchData = async () => {
         try {
             const response = await axios.get(`/api/view_profile/${usernameParamter}`);
             setUserData(response.data);
-          /*  user_data.academic_year = reps_json.academic_year ; 
-            user_data.badges = reps_json.badges;  
-            user_data.balance = reps_json.balance ; 
-              
-            user_data.date_joined = reps_json.date_joined ; 
-            user_data.governorate = reps_json.governorate ; 
-            user_data.verified = reps_json.verified ; 
-            user_data.points = reps_json.points ; 
-
-            user_data.email = reps_json.email ; 
-            user_data.gender = reps_json.gender ;
-            user_data.birth_date = reps_json.birth_date;
-
-            user_data.firstname = reps_json.first_name ;
-            user_data.lastname = reps_json.last_name ;
-            user_data.parent_name = reps_json.parent_name ;
-            user_data.parent_phone_number = reps_json.parent_phone_number ; 
-            user_data.phone_number  = reps_json.phone_number ;*/
         } catch (error) {
           console.error('Error fetching data:', error);
         }  
     };
     fetchData();
-  }, [user_data]);
+  }, []);
 
   return (
     <div className="profile-container">
@@ -79,7 +59,7 @@ const Profile = () => {
         </div>   
         <div className="profile-details">      
         <p><span className='strong'>User Name </span> {user_data.username}</p>
-        <p><span className='strong'>Name </span> {user_data.firstname + " " + user_data.lastname}</p>
+        <p><span className='strong'>Name </span> {user_data.first_name + " " + user_data.last_name}</p>
         <p><span className='strong'>Governerate </span> {user_data.governorate}</p>
         <p><span className='strong'>Gender </span> {user_data.gender==='F' ? 'Female' : 'Male'}</p>
         {user_data.view_self ?(<>

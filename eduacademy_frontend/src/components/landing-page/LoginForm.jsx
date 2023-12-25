@@ -132,7 +132,7 @@ const Auth = () => {
 
             } catch (error) {
                 if (error.response.status === 404) {
-                    alert('Message:' + error.response.data);
+                    alert('Message:' + error.response.data.detail);
                 } else if (error.response.status === 403) {
                     alert('Message: You Already Loged In');
                 } else {
