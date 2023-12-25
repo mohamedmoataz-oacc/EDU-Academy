@@ -114,8 +114,8 @@ def create_teachers():
     print("Creating teachers (also creates their courses) ...")
     create_teacher = Teacher.objects.create
     for user in tqdm(User.objects.filter(user_role__role="Teacher")):
-        id_path = "./media/teachers/id.jpeg"
-        personal_photo_path = "./media/teachers/personal.jpg"
+        id_path = "teachers/id.jpeg"
+        personal_photo_path = "teachers/personal.jpg"
         
         t = create_teacher(
             teacher = user,
@@ -145,7 +145,7 @@ def create_course(teacher: Teacher, subject : Subject):
         description = f"{subject.subject_name} by {teacher.teacher.first_name} {teacher.teacher.last_name}",
         lecture_price = random.choice([40, 50, 60, 70, 80, 90]),
         package_size = random.choice([2, 3, 4, 5, 6]),
-        thumbnail = f"./media/courses/courses_thumbnails/{subject.subject_name}/1.jpeg"
+        thumbnail = f"courses/courses_thumbnails/{subject.subject_name}/1.jpeg"
     )
     return c
 
@@ -154,7 +154,7 @@ def create_lectures(course:Course):
         Lecture.objects.create(
             course=course,
             lecture_title = course.subject.subject_name+str(course.pk)+ " lec" +str(i),
-            video = "./media/courses/videos/1.mp4"
+            video = "courses/videos/1.mp4"
         )
 
 create_users_roles()

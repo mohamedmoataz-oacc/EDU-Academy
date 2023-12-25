@@ -66,6 +66,9 @@ class Teacher(models.Model):
     personal_photo = models.ImageField(upload_to="teachers/personal_photos/")
     national_ID_photo = models.ImageField(upload_to="teachers/national_IDs/")
 
+    def __str__(self):
+        return f"{self.teacher.first_name} {self.teacher.last_name}"
+
 class TeachRequest(models.Model):
     teacher = models.OneToOneField(Teacher, on_delete=models.CASCADE)
 
