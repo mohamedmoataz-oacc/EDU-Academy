@@ -54,7 +54,7 @@ def create_users_roles():
         UsersRole.objects.create(role=role)
 
 def create_payment_methods():
-    methods = ["VodaCash", "PayPal", "Fawry"]
+    methods = ["balance", "points"]
     for method in methods:
         PaymentMethod.objects.create(method=method)
 
