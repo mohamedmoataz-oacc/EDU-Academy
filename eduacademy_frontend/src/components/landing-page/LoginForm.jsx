@@ -86,7 +86,7 @@ const Auth = () => {
 
 
                 if (response.status === 200) {
-                    alert('Message:' + response.data);
+                    alert('Message:' + response.data.detail);
                     setIsSignup(false)
                 }
 

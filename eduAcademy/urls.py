@@ -27,5 +27,7 @@ urlpatterns = [
     path('Login', views.index, name='index'),
     path('CompleteProfile', views.index, name='index'),
     path('Profile', views.index, name='index'),
-    path('Home', views.index, name='index')
+    path('Home', views.index, name='index'),
+    path('Createcourse', views.index, name='index'),
+    
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

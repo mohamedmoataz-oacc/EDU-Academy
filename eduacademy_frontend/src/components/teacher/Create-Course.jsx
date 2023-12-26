@@ -1,7 +1,8 @@
 import React, { useState } from 'react'
 import { FiUpload } from "react-icons/fi";
+import axios from 'axios';
 
-export const Createcourse = () => {
+const Createcourse = () => {
     const createCourse = {
         subject : '',
         course_name : '',
@@ -37,14 +38,40 @@ export const Createcourse = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        Object.assign(createCourse, {'thumbnail': thumbnail})
-        console.log(createCourse)
-       /* if (!thumbnailValid) {
-            console.error('Invalid type. Please select an image.');
-            return;
-        } else {
-            console.log(form)
-        }*/
+        let response;
+        const formData = new FormData();
+        const csrfToken = document.cookie
+        .split('; ')
+        .find((row) => row.startsWith('csrftoken='))
+        .split('=')[1];
+
+
+        // Append form data to the FormData object
+        formData.append('subject', form.subject);
+        formData.append('course_name', form.course_name);
+        formData.append('description', form.description);
+        formData.append('lecture_price', form.lecture_price);
+        formData.append('package_size', form.package_size);
+        formData.append('thumbnail', thumbnail);
+
+        try {
+            response = await axios.post('/api/create_course/', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                    'X-CSRFToken': csrfToken
+                },
+            });
+
+            if (response.status === 200) {
+                let resp_json = response.data
+                alert('Messgae: ' + resp_json.detail);
+            }
+
+
+        } catch (error) {
+            alert('there is a proplem try again correctly')
+        }
+    
     }
 
   return (
@@ -137,3 +164,6 @@ export const Createcourse = () => {
     </div>
   )
 }
+
+
+export default Createcourse
