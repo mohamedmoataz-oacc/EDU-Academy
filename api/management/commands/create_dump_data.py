@@ -1,11 +1,9 @@
 from django.core.management.base import BaseCommand
-from asgiref.sync import sync_to_async
 
 from api.models import *
 
 import random
 from datetime import date, timedelta
-import asyncio
 from tqdm import tqdm
 
 class Command(BaseCommand):

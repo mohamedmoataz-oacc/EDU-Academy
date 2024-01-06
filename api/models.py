@@ -1,4 +1,5 @@
 from django.db import models
+from autoslug import AutoSlugField
 from django.contrib.auth.models import AbstractUser
 
 class UsersRole(models.Model):
@@ -170,6 +171,7 @@ class Lecture(models.Model):
         unique_together = ('lecture_title', 'course')
         
     lecture_title = models.CharField(max_length=150)
+    lecture_slug = AutoSlugField(populate_from='lecture_title')
     video = models.FileField(null=True, max_length=250)
     upload_date = models.DateTimeField(auto_now_add=True)
 

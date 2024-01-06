@@ -211,7 +211,8 @@ def create_course(request):
         data = {i:j[0] if isinstance(j, list) else j for i, j in data.items()}
 
         serializer = CourseCreationSerializer(data=data)
-        serializer.is_valid(raise_exception=True)
+        if serializer.is_valid(raise_exception=True):
+            data['subject'] = serializer.data['subject']
 
         Course.objects.create(
             teacher = Teacher.objects.get(teacher=request.user),
@@ -291,7 +292,7 @@ def create_lecture(request, course_id:int = None):
 ################
 
 @api_view(['GET'])
-def view_lecture(request, course_id:int, lecture_title:str):
+def view_lecture(request, course_id:int, lecture_slug:str):
     user = request.user
     if not user.is_authenticated:
         return Response({
@@ -301,7 +302,7 @@ def view_lecture(request, course_id:int, lecture_title:str):
             status=status.HTTP_401_UNAUTHORIZED
         )
     course = Course.objects.get(pk=course_id)
-    lecture = get_object_or_404(Lecture, lecture_title=lecture_title, course=course)
+    lecture = get_object_or_404(Lecture, lecture_slug=lecture_slug, course=course)
     return roles_to_actions[user.user_role.role]["view_lecture"](user, lecture)
 
 

@@ -213,6 +213,7 @@ def get_basic_course_info(course_id:int):
         "lectures" : [
             {
                 "lecture_title" : lecture.lecture_title,
+                "lecture_slug" : lecture.lecture_slug,
                 "upload_date" : lecture.upload_date
             } for lecture in Lecture.objects.filter(course=course)
         ],
