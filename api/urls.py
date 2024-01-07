@@ -12,7 +12,6 @@ urlpatterns = [
     path('view_profile/<str:username>/', view_profile, name='view_profile'),
     path('create_course/', create_course, name='create_course'),
     path('my_courses/', my_courses, name='my_courses'),
-    path('get_courses/<int:subset>/<str:fields>/', get_courses, name='get_filtered_courses'),
     path('get_courses/<int:subset>/', get_courses, name='get_portion_courses'),
     path('get_courses/', get_courses, name='get_all_courses'),
     path('get_subjects/', get_subjects, name='get_subjects'),

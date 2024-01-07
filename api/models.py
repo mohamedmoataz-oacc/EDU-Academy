@@ -17,9 +17,14 @@ class User(AbstractUser):
     gender = models.CharField(max_length=1, choices=gender_choices)
     first_name = models.CharField(max_length=20)
     last_name = models.CharField(max_length=20)
+    full_name = models.CharField(max_length=40)
     governorate = models.CharField(max_length=20)
     phone_number = models.IntegerField()
     birth_date = models.DateField()
+
+    def save(self, *args, **kwargs):
+        self.full_name = self.first_name + ' ' + self.last_name
+        super(User, self).save(*args, **kwargs)
 
     def __str__(self):
         return f'{User.username}'

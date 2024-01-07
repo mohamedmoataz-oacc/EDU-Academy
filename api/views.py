@@ -418,19 +418,18 @@ def my_courses(request):
 ###############
 
 @api_view(['GET'])
-def get_courses(request, fields:str = "", subset=None):
+def get_courses(request, subset=None):
     if not subset: return Response({"redirect_to":reverse("api:get_portion_courses", args=(1,))})
     fields_to_filters = {
         "subject": "subject__subject_name",
-        "teacher": "teacher__teacher__username",
+        "teacher": "teacher__teacher__full_name__icontains",
         "completed": "completed",
     }
-    fields = fields.split("&")
+    fields = request.GET
     filters = dict()
-    for i in fields:
-        i = i.split("=")
-        if len(i) != 2 or i[0] not in fields_to_filters: continue
-        filters[fields_to_filters[i[0]]] = i[1]
+    for i, j in fields.items():
+        if i not in fields_to_filters: continue
+        filters[fields_to_filters[i]] = j
     
     all_courses = Course.objects.all()
     all_courses = all_courses.filter(**filters)[20*(subset-1):20*subset]
@@ -488,11 +487,7 @@ def search_course(request, name):
 
 @api_view(['GET'])
 def search_teacher(request, name):
-    teachers_matched = Teacher.objects.annotate(
-        full_name = Concat('teacher__first_name', V(' '), 'teacher__last_name')
-    )
-
-    teachers_matched = teachers_matched.filter(teacher__full_name__icontains=name)
+    teachers_matched = Teacher.objects.filter(teacher__full_name__icontains=name)
     teachers = [
         {
             "personal_photo" : str(teacher.personal_photo),
