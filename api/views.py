@@ -21,15 +21,6 @@ from .serializers import *
 # 2. See all teachers and be able to filter by subject and grade
 # 3. Get the student's points
 
-#######################
-# CSRF token endpoint #
-#######################
-
-@ensure_csrf_cookie
-@api_view(['GET'])
-def get_csrf_token(request):
-    return Response()
-
 ###########
 # Sign up #
 ###########
@@ -99,10 +90,12 @@ def login_user(request):
     elif request.method == 'GET':
         return Response()
 
-@api_view(['GET'])
+@api_view(['GET', 'POST'])
 def logout_user(request):
-    logout(request)
-    return Response({"detail": "User logged out successfully"})
+    if request.method == 'POST':
+        logout(request)
+        return Response({"detail": "User logged out successfully."})
+    return Response({"detail": "Logging out must be done via a POST request."})
 
 ######################
 # Profile completion #
