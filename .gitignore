@@ -1,4 +1,5 @@
 .venv
+.env
 .vscode
 .EDU-Academy-Venv
 /eduacademy_frontend/node_modules/

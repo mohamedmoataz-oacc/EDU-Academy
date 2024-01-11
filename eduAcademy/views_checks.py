@@ -1,4 +1,6 @@
-from .models import Teacher, Student, Assistant, Course, Payment
+from accounts.models import Teacher, Student, Assistant
+from courses.models import Course
+from payment_credits.models import Payment
 
 roles_to_models = {"Teacher": Teacher, "Student": Student, "Assistant": Assistant}
 
