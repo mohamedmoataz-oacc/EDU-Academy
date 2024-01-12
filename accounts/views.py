@@ -5,6 +5,9 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 
+from allauth.socialaccount.providers.facebook.views import FacebookOAuth2Adapter
+from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
+
 from .serializers import *
 from eduAcademy.views_checks import *
 
@@ -84,3 +87,18 @@ def logout_user(request):
         logout(request)
         return Response({"detail": "User logged out successfully."})
     return Response({"detail": "Logging out must be done via a POST request."})
+
+############
+# Facebook #
+############
+
+# class FacebookLogin(SocialLoginView):
+#     adapter_class = FacebookOAuth2Adapter
+
+
+##########
+# Google #
+##########
+
+# class GoogleLogin(SocialLoginView):
+#     adapter_class = GoogleOAuth2Adapter

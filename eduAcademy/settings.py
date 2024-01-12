@@ -43,8 +43,8 @@ INSTALLED_APPS = [
     'corsheaders',
     'rest_framework',
     'rest_framework.authtoken',
-    'rest_auth',
-    'rest_auth.registration',
+    "dj_rest_auth",
+    "dj_rest_auth.registration",
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
@@ -69,6 +69,8 @@ MIDDLEWARE = [
 
     "allauth.account.middleware.AccountMiddleware",
 ]
+
+SITE_ID = 1
 
 # FILE_UPLOAD_HANDLERS = [
 #     "django.core.files.uploadhandler.MemoryFileUploadHandler",
@@ -141,6 +143,12 @@ SOCIALACCOUNT_PROVIDERS = {
         'APP': {
             'client_id': os.getenv('GOOGLE_CLIENT_ID'),
             'secret': os.getenv('GOOGLE_SECRET'),
+        }
+    },
+    'facebook': {
+        'APP': {
+            'client_id': os.getenv('FACEBOOK_CLIENT_ID'),
+            'secret': os.getenv('FACEBOOK_SECRET'),
         }
     }
 }
