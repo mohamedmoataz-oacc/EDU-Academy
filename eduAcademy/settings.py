@@ -72,6 +72,23 @@ MIDDLEWARE = [
 
 SITE_ID = 1
 
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+# EMAIL_USE_TLS = True
+# EMAIL_HOST = 'smtp.gmail.com'
+# EMAIL_HOST_USER = os.getenv("EMAIL_USER")
+# EMAIL_HOST_PASSWORD = os.getenv("EMAIL_PASSWORD")
+# EMAIL_PORT = 587
+
+ACCOUNT_AUTHENTICATION_METHOD = 'email'
+ACCOUNT_USERNAME_REQUIRED = False
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_UNIQUE_EMAIL = True
+
+ACCOUNT_CONFIRM_EMAIL_ON_GET = True
+ACCOUNT_EMAIL_CONFIRMATION_AUTHENTICATED_REDIRECT_URL = 'http://localhost:8000/accounts/login/'
+LOGIN_URL = 'http://localhost:8000/accounts/login/'
+
 # FILE_UPLOAD_HANDLERS = [
 #     "django.core.files.uploadhandler.MemoryFileUploadHandler",
 #     "django.core.files.uploadhandler.TemporaryFileUploadHandler",

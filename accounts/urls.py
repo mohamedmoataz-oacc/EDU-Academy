@@ -1,14 +1,18 @@
-from dj_rest_auth.registration.views import RegisterView, VerifyEmailView
+from dj_rest_auth.registration.views import VerifyEmailView, ConfirmEmailView
 from dj_rest_auth.views import LoginView, LogoutView, UserDetailsView, PasswordResetView, PasswordChangeView
 from django.urls import path
+from .views import SignUpView, profile_completed
 
 
 urlpatterns = [
     path("user/", UserDetailsView.as_view(), name="user_details"),
-    path("register/", RegisterView.as_view(), name="register"),
+    path("profile-completed/", profile_completed, name="profile_completed"),
+    path('account-confirm-email/<str:key>/', ConfirmEmailView.as_view(), name="account_confirm_email"),
+    path('account-confirm-email/', VerifyEmailView.as_view(), name='account_email_verification_sent'),
+    path("register/", SignUpView.as_view(), name="register"),
     path("login/", LoginView.as_view(), name="login"),
     path("logout/", LogoutView.as_view(), name="logout"),
-    path("request_password_reset/", PasswordResetView.as_view(), name="request_password_reset"),
-    path("change_password/", PasswordChangeView.as_view(), name="change_password"),
-    path("verify_email/", VerifyEmailView.as_view(), name="verify_email"),
+    
+    path("request-password-reset/", PasswordResetView.as_view(), name="request_password_reset"),
+    path("change-password/", PasswordChangeView.as_view(), name="change_password"),
 ]

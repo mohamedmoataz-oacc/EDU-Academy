@@ -1,14 +1,6 @@
 from rest_framework import serializers
 from .models import *
 
-class LoginSerializer(serializers.ModelSerializer):
-    username = serializers.CharField(max_length=50)
-    class Meta:
-        model = User
-        fields = ('username', 'password')
-
-    def validate_username(self, value): return value
-
 class SignupSerializer(serializers.ModelSerializer):
     user_role = serializers.CharField(max_length=15)
     class Meta:
@@ -21,3 +13,18 @@ class SignupSerializer(serializers.ModelSerializer):
         if len(role) == 0:
             raise serializers.ValidationError("There is no such role.")
         return role[0].pk
+    
+    def save(self, request):
+        data = self.data
+        return User.objects.create_user(
+            username=data['username'],
+            email=data['email'],
+            password=data['password'],
+            first_name=data['first_name'],
+            last_name=data['last_name'],
+            governorate=data['governorate'],
+            phone_number=data['phone_number'],
+            gender=data['gender'],
+            birth_date = data['birth_date'],
+            user_role=UsersRole.objects.get(pk=data['user_role']),
+        )
