@@ -22,16 +22,16 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('accounts/', include('accounts.urls')),
-    path('courses/', include('courses.urls')),
-    path('profile/', include('profiles.urls')),
-    path('credits/', include('payment_credits.urls')),
+    path('api/accounts/', include('accounts.urls')),
+    path('api/courses/', include('courses.urls')),
+    path('api/profile/', include('profiles.urls')),
+    path('api/credits/', include('payment_credits.urls')),
 
-    path('', views.index, name='index'),
-    path('Login', views.index, name='index'),
-    path('CompleteProfile', views.index, name='index'),
-    path('Profile', views.index, name='index'),
-    path('Home', views.index, name='index'),
-    path('Createcourse', views.index, name='index'),
+    path('', views.index, name='index1'),
+    path('Login', views.index, name='index2'),
+    path('CompleteProfile', views.index, name='index3'),
+    path('Profile', views.index, name='index4'),
+    path('Home', views.index, name='index5'),
+    path('Createcourse', views.index, name='index6'),
     
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
