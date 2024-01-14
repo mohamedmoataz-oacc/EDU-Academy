@@ -72,8 +72,8 @@ MIDDLEWARE = [
 
 SITE_ID = 1
 
-# EMAIL_BACKEND = 'backends.brevo_mail.EmailBackend'
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+EMAIL_BACKEND = 'backends.brevo_mail.EmailBackend'
+# EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 ACCOUNT_AUTHENTICATION_METHOD = 'email'
 ACCOUNT_USERNAME_REQUIRED = False
