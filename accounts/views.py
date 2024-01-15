@@ -1,5 +1,6 @@
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.shortcuts import redirect
+from django.urls import reverse
 
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -9,6 +10,7 @@ from allauth.socialaccount.providers.facebook.views import FacebookOAuth2Adapter
 from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
 
 from dj_rest_auth.registration.views import RegisterView, VerifyEmailView
+from dj_rest_auth.views import PasswordResetConfirmView
 
 import eduAcademy.settings as app_settings
 from .serializers import *
@@ -23,7 +25,13 @@ class EmailVerificationView(VerifyEmailView):
             request.method = 'POST'
             request.data.update(kwargs)
             self.post(request, **kwargs)
-        return redirect('index1')
+        return redirect('index')
+
+class RedirectPasswordResetConfirmView(PasswordResetConfirmView):
+    def get(self, request, uidb64, token):
+        url = f"{reverse('frontend_password_reset_confirm')}?token={token}&uidb64={uidb64}"
+        return redirect(url)
+
 
 @ensure_csrf_cookie
 @api_view(['GET'])

@@ -43,7 +43,6 @@ class Student(models.Model):
     parent_name = models.CharField(max_length=60)
     points = models.IntegerField(default=0)
     balance = models.IntegerField(default=0)
-    verified = models.BooleanField(default=False)
     personal_photo = models.ImageField(upload_to="students/personal_photos/", null=True, blank=True)
 
     def __str__(self):
