@@ -11,16 +11,16 @@ class UsersRole(models.Model):
 class User(AbstractUser):
     gender_choices = [("M", "Male"), ("F", "Female")]
 
-    user_role = models.ForeignKey(UsersRole, on_delete=models.CASCADE)
+    user_role = models.ForeignKey(UsersRole, on_delete=models.CASCADE, null=True)
 
     email = models.EmailField(unique=True)
-    gender = models.CharField(max_length=1, choices=gender_choices)
+    gender = models.CharField(max_length=1, choices=gender_choices, null=True)
     first_name = models.CharField(max_length=20)
     last_name = models.CharField(max_length=20)
     full_name = models.CharField(max_length=40)
-    governorate = models.CharField(max_length=20)
-    phone_number = models.IntegerField()
-    birth_date = models.DateField()
+    governorate = models.CharField(max_length=20, null=True)
+    phone_number = models.IntegerField(null=True)
+    birth_date = models.DateField(null=True)
 
     def save(self, *args, **kwargs):
         self.full_name = self.first_name + ' ' + self.last_name

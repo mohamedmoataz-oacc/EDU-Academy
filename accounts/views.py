@@ -6,10 +6,11 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 
+from allauth.socialaccount.providers.oauth2.client import OAuth2Client
 from allauth.socialaccount.providers.facebook.views import FacebookOAuth2Adapter
 from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
 
-from dj_rest_auth.registration.views import RegisterView, VerifyEmailView
+from dj_rest_auth.registration.views import RegisterView, VerifyEmailView, SocialLoginView
 from dj_rest_auth.views import PasswordResetConfirmView
 
 import eduAcademy.settings as app_settings
@@ -58,5 +59,7 @@ def profile_completed(request):
 # Google #
 ##########
 
-# class GoogleLogin(SocialLoginView):
-#     adapter_class = GoogleOAuth2Adapter
+class GoogleLogin(SocialLoginView):
+    adapter_class = GoogleOAuth2Adapter
+    callback_url = "http://127.0.0.1:8000/api/accounts/google/"
+    client_class = OAuth2Client

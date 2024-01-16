@@ -159,7 +159,15 @@ SOCIALACCOUNT_PROVIDERS = {
         'APP': {
             'client_id': os.getenv('GOOGLE_CLIENT_ID'),
             'secret': os.getenv('GOOGLE_SECRET'),
-        }
+        },
+        "SCOPE": [
+            "profile",
+            "email",
+        ],
+        "AUTH_PARAMS": {
+            "access_type": "online",
+        },
+        "VERIFIED_EMAIL": True,
     },
     'facebook': {
         'APP': {
