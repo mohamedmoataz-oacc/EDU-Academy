@@ -25,9 +25,9 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
-ALLOWED_HOSTS = [".vercel.app"]
+ALLOWED_HOSTS = ["*"]
 
 # Application definition
 
@@ -83,7 +83,8 @@ ACCOUNT_EMAIL_VERIFICATION = "mandatory"
 ACCOUNT_CONFIRM_EMAIL_ON_GET = True
 ACCOUNT_EMAIL_CONFIRMATION_COOLDOWN = 600
 
-LOGIN_URL = 'http://localhost:8000/api/accounts/login/'
+
+LOGIN_URL = "/accounts/login"
 ACCOUNT_EMAIL_CONFIRMATION_AUTHENTICATED_REDIRECT_URL = LOGIN_URL
 EMAIL_CONFIRM_REDIRECT_BASE_URL = LOGIN_URL
 PASSWORD_RESET_CONFIRM_REDIRECT_BASE_URL = LOGIN_URL
@@ -94,7 +95,6 @@ PASSWORD_RESET_CONFIRM_REDIRECT_BASE_URL = LOGIN_URL
 # ]
 
 CORS_ORIGIN_ALLOW_ALL = True
-LOGIN_URL = "/accounts/login"
 ROOT_URLCONF = 'eduAcademy.urls'
 
 TEMPLATES = [
@@ -118,13 +118,23 @@ WSGI_APPLICATION = 'eduAcademy.wsgi.application'
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.mysql",
-        "NAME": "edu_academy",
-        "USER": "root",
-        "PASSWORD": "root",
-        "HOST": "127.0.0.1",
-        "PORT": "3306",
+        "NAME": os.getenv("NAME"),
+        "USER": os.getenv("USER"),
+        "PASSWORD": os.getenv("PASSWORD"),
+        "HOST": os.getenv("HOST"),
+        "PORT": os.getenv("PORT"),
     }
 }
+# DATABASES = {
+#     "default": {
+#         "ENGINE": "django.db.backends.mysql",
+#         "NAME": "edu_academy",
+#         "USER": "root",
+#         "PASSWORD": "root",
+#         "HOST": "127.0.0.1",
+#         "PORT": "3306",
+#     }
+# }
 
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': ['rest_framework.permissions.AllowAny'],
