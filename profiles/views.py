@@ -52,7 +52,7 @@ def view_profile(request, username=None):
     if not profile_is_completed(request.user):
         return Response({
                 "detail":"User should complete his account view profiles",
-                "redirect_to": reverse("api:complete_profile"),
+                "redirect_to": reverse("profiles:complete_profile"),
                 "user_role": request.user.user_role.role
             },
             status=status.HTTP_403_FORBIDDEN
