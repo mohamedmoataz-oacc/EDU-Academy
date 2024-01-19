@@ -6,8 +6,6 @@ from rest_framework.response import Response
 from rest_framework import status
 
 from allauth.socialaccount.providers.oauth2.client import OAuth2Client
-from allauth.socialaccount.providers.facebook.views import FacebookOAuth2Adapter
-from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
 
 from dj_rest_auth.registration.views import RegisterView, VerifyEmailView, SocialLoginView
 from dj_rest_auth.views import PasswordResetConfirmView
@@ -15,7 +13,7 @@ from dj_rest_auth.views import PasswordResetConfirmView
 import eduAcademy.settings as app_settings
 from .serializers import *
 from eduAcademy.views_checks import *
-from adapters.google_adapter import CustomGoogleOAuth2Adapter
+from adapters.oauthadapters import CustomGoogleOAuth2Adapter, CustomFacebookOAuth2Adapter
 
 class SignUpView(RegisterView):
     serializer_class = SignupSerializer
@@ -51,7 +49,7 @@ def profile_completed(request):
 ############
 
 class FacebookLogin(SocialLoginView):
-    adapter_class = FacebookOAuth2Adapter
+    adapter_class = CustomFacebookOAuth2Adapter
     client_class = OAuth2Client
     callback_url = app_settings.SITE_URL + "/api/accounts/facebook/"
 

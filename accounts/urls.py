@@ -13,7 +13,7 @@ urlpatterns = [
     path("register/", SignUpView.as_view(), name="account_signup"),
     path("login/", LoginView.as_view(), name="account_login"),
     path("logout/", LogoutView.as_view(), name="account_logout"),
-    path('password-reset/', PasswordResetView.as_view()),
+    path('password-reset/', PasswordResetView.as_view(), name="account_reset_password"),
     path('password-reset-confirm/<uidb64>/<token>/', RedirectPasswordResetConfirmView.as_view(), name='password_reset_confirm'),
     path('password-reset-confirm/', PasswordResetConfirmView.as_view(), name='password_reset_confirm_frontend'),
     path("google/", GoogleLogin.as_view(), name="google_login"),
