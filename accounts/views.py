@@ -1,4 +1,3 @@
-from django.views.decorators.csrf import ensure_csrf_cookie
 from django.shortcuts import redirect
 from django.urls import reverse
 
@@ -16,6 +15,7 @@ from dj_rest_auth.views import PasswordResetConfirmView
 import eduAcademy.settings as app_settings
 from .serializers import *
 from eduAcademy.views_checks import *
+from adapters.google_adapter import CustomGoogleOAuth2Adapter
 
 class SignUpView(RegisterView):
     serializer_class = SignupSerializer
@@ -34,7 +34,6 @@ class RedirectPasswordResetConfirmView(PasswordResetConfirmView):
         return redirect(url)
 
 
-@ensure_csrf_cookie
 @api_view(['GET'])
 def profile_completed(request):
     if not request.user.is_authenticated:
@@ -43,7 +42,7 @@ def profile_completed(request):
     user = request.user
     return Response({
             "detail":f"{bool(profile_is_completed(user))}",
-            "user_role": user.user_role.role
+            "user_role": user.user_role.role,
         }
     )
 
@@ -51,8 +50,10 @@ def profile_completed(request):
 # Facebook #
 ############
 
-# class FacebookLogin(SocialLoginView):
-#     adapter_class = FacebookOAuth2Adapter
+class FacebookLogin(SocialLoginView):
+    adapter_class = FacebookOAuth2Adapter
+    client_class = OAuth2Client
+    callback_url = app_settings.SITE_URL + "/api/accounts/facebook/"
 
 
 ##########
@@ -60,6 +61,6 @@ def profile_completed(request):
 ##########
 
 class GoogleLogin(SocialLoginView):
-    adapter_class = GoogleOAuth2Adapter
-    callback_url = "http://127.0.0.1:8000/api/accounts/google/"
+    adapter_class = CustomGoogleOAuth2Adapter
+    callback_url = app_settings.SITE_URL + "/api/accounts/google/"
     client_class = OAuth2Client

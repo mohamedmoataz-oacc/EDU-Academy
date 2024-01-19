@@ -1,9 +1,8 @@
 from django.urls import path
 from .views import (
     SignUpView, EmailVerificationView, RedirectPasswordResetConfirmView, profile_completed,
-    GoogleLogin,
+    GoogleLogin, FacebookLogin,
 )
-from allauth.socialaccount.views import signup
 from dj_rest_auth.views import LoginView, LogoutView, PasswordResetView, PasswordResetConfirmView
 
 
@@ -17,7 +16,6 @@ urlpatterns = [
     path('password-reset/', PasswordResetView.as_view()),
     path('password-reset-confirm/<uidb64>/<token>/', RedirectPasswordResetConfirmView.as_view(), name='password_reset_confirm'),
     path('password-reset-confirm/', PasswordResetConfirmView.as_view(), name='password_reset_confirm_frontend'),
-    # TODO: Implement Google & Facebook authentication
-    path("signup/", signup, name="socialaccount_signup"),
     path("google/", GoogleLogin.as_view(), name="google_login"),
+    path("facebook/", FacebookLogin.as_view(), name="facebook_login"),
 ]
