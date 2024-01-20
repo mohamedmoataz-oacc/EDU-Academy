@@ -1,4 +1,4 @@
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, redirect
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.urls import reverse
 
@@ -18,12 +18,38 @@ from .serializers import *
 ######################
 
 @ensure_csrf_cookie
+@api_view(['POST'])
+def complete_user_role(request):
+    if not request.user.is_authenticated:
+        return Response({
+                "detail":"User should log in first to complete his profile",
+                "redirect_to": reverse("account_login")
+            },
+            status=status.HTTP_401_UNAUTHORIZED
+        )
+    
+    serializer = UserRoleSerializer(data=request.data)
+    if serializer.is_valid(raise_exception=True):
+        data = serializer.data
+    user = request.user
+    user.user_role = UsersRole.objects.get(pk=data['user_role'])
+    user.save()
+    return Response({"detail": "Role completed successfully"})
+
+@ensure_csrf_cookie
 @api_view(['GET', 'POST'])
 def complete_profile(request):
     if not request.user.is_authenticated:
         return Response({
                 "detail":"User should log in first to complete his profile",
-                "redirect_to": reverse("api:login")
+                "redirect_to": reverse("account_login")
+            },
+            status=status.HTTP_401_UNAUTHORIZED
+        )
+    if request.user.user_role is None:
+        return Response({
+                "detail":"User should have a role to complete his profile",
+                "redirect_to": reverse("profiles:complete_user_role")
             },
             status=status.HTTP_401_UNAUTHORIZED
         )
@@ -31,8 +57,24 @@ def complete_profile(request):
         return Response({"detail": "The user's profile has been already completed"}, status=status.HTTP_403_FORBIDDEN)
     
     if request.method == 'GET':
-        return Response({"user_role": request.user.user_role.role})
+        all_fields = [f.name for f in User._meta.get_fields()]
+        extra = []
+        for i in all_fields:
+            try:
+                if getattr(request.user, i) is None: extra.append(i)
+            except: pass
+        return Response({
+            "user_role": request.user.user_role.role,
+            "extra_data": extra
+        })
     elif request.method == 'POST':
+        serializer = UserProfileSerializer(data=request.data)
+        if serializer.is_valid(raise_exception=True):
+            if serializer.data.get('governorate') and request.user.governorate is None:
+                request.user.governorate = serializer.data.get('governorate')
+            if serializer.data.get('phone_number') and request.user.phone_number is None:
+                request.user.phone_number = serializer.data.get('phone_number')
+        request.user.save()
         return roles_to_actions[request.user.user_role.role]["completion"](request)
 
 
@@ -50,16 +92,18 @@ def view_profile(request, username=None):
             status=status.HTTP_401_UNAUTHORIZED
         )
     if not profile_is_completed(request.user):
+        role = request.user.user_role
         return Response({
                 "detail":"User should complete his account view profiles",
-                "redirect_to": reverse("profiles:complete_profile"),
-                "user_role": request.user.user_role.role
+                "redirect_to": reverse("profiles:complete_profile") if role else reverse("profiles:complete_user_role"),
+                "user_role": role.role if role else None,
             },
             status=status.HTTP_403_FORBIDDEN
         )
     if username is None:
         return Response({"redirect_to": reverse("api:view_profile", args=request.user.username)})
     
+    username = request.GET.get("username")
     user = get_object_or_404(User, username=username)
 
     view_self = request.user == user

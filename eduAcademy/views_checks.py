@@ -5,10 +5,10 @@ from payment_credits.models import Payment
 roles_to_models = {"Teacher": Teacher, "Student": Student, "Assistant": Assistant}
 
 def is_student(user):
-    return Student.objects.filter(pk=user.pk).count()
+    return Student.objects.filter(pk=user.pk).exists()
 
 def is_teacher(user):
-    return Teacher.objects.filter(pk=user.pk).count()
+    return Teacher.objects.filter(pk=user.pk).exists()
 
 def is_accepted_teacher(user):
     if is_teacher(user):
@@ -16,15 +16,16 @@ def is_accepted_teacher(user):
     return False
 
 def is_assistant(user):
-    return Assistant.objects.filter(pk=user.pk).count()
+    return Assistant.objects.filter(pk=user.pk).exists()
 
 def profile_is_completed(user):
-    return roles_to_models.get(user.user_role.role).objects.filter(pk=user.pk).count()
+    if user.user_role is None: return False
+    return roles_to_models.get(user.user_role.role).objects.filter(pk=user.pk).exists()
 
 def student_enrolled_in_course(user, course_id:int):
     if is_student(user):
         student = Student.objects.get(student=user)
-        course = student.course_set.filter(pk=course_id).count()
+        course = student.course_set.filter(pk=course_id).exists()
         return course
     return False
 
@@ -36,13 +37,13 @@ def teacher_created_course(user, course_id:int):
 def assistant_assisting_in_course(user, course_id:int):
     if is_assistant(user):
         assistant = Assistant.objects.get(assistant=user)
-        course = assistant.course_set.filter(pk=course_id).count()
+        course = assistant.course_set.filter(pk=course_id).exists()
         return course
     return False
 
 def student_bought_lecture(user, lecture):
     student = Student.objects.get(student=user)
-    return Payment.objects.filter(student=student, lecture=lecture).count()
+    return Payment.objects.filter(student=student, lecture=lecture).exists()
 
 POINT_VALUE = 1/5
 def points_to_pounds(points:int):
