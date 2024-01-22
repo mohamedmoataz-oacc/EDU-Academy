@@ -11,21 +11,6 @@ class Notification(models.Model):
     def __str__(self):
         return str(self.notification_title)
 
-class Badge(models.Model):
-    students = models.ManyToManyField(Student, through="BadgeEarning")
-
-    badge_name = models.CharField(max_length=100)
-
-    def __str__(self):
-        return str(self.badge_name)
-
-class BadgeEarning(models.Model):
-    badge = models.ForeignKey(Badge, on_delete=models.CASCADE)
-    student = models.ForeignKey(Student, on_delete=models.CASCADE)
-
-    class Meta:
-        unique_together = ('student', 'badge')
-
 class TeacherBalanceTransaction(models.Model):
     teacher = models.OneToOneField(Teacher, on_delete=models.CASCADE)
 

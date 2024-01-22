@@ -106,7 +106,6 @@ def student_view_profile(user, user_profile: dict, view_self):
             "parent_name" : student.parent_name,
             "points" : student.points if view_self else None,
             "balance" : student.balance if view_self else None,
-            "verified" : student.verified if view_self else None,
             "personal_photo" : f"media/{student.personal_photo}" if student.personal_photo else None,
             "badges" : [badge.badge_name for badge in badges_list]
         }

@@ -94,16 +94,14 @@ def view_profile(request, username=None):
     if not profile_is_completed(request.user):
         role = request.user.user_role
         return Response({
-                "detail":"User should complete his account view profiles",
+                "detail":"User should complete his account to view profiles",
                 "redirect_to": reverse("profiles:complete_profile") if role else reverse("profiles:complete_user_role"),
                 "user_role": role.role if role else None,
             },
             status=status.HTTP_403_FORBIDDEN
         )
-    if username is None:
-        return Response({"redirect_to": reverse("api:view_profile", args=request.user.username)})
     
-    username = request.GET.get("username")
+    username = request.GET.get("username") or request.user.username
     user = get_object_or_404(User, username=username)
 
     view_self = request.user == user
