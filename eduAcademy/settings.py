@@ -11,7 +11,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
 from pathlib import Path
-import os 
+import os
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -68,6 +68,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 
     "allauth.account.middleware.AccountMiddleware",
+    "middlewares.mediamiddleware.GatedContent",
 ]
 
 SITE_ID = 1
@@ -140,7 +141,6 @@ DATABASES = {
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': ['rest_framework.permissions.AllowAny'],
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators

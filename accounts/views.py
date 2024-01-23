@@ -13,7 +13,7 @@ from dj_rest_auth.views import PasswordResetConfirmView
 import eduAcademy.settings as app_settings
 from .serializers import *
 from eduAcademy.views_checks import *
-from adapters.oauthadapters import CustomGoogleOAuth2Adapter, CustomFacebookOAuth2Adapter
+from .adapters.oauthadapters import CustomGoogleOAuth2Adapter, CustomFacebookOAuth2Adapter
 
 class SignUpView(RegisterView):
     serializer_class = SignupSerializer

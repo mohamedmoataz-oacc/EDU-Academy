@@ -87,7 +87,7 @@ def view_profile(request, username=None):
     if not request.user.is_authenticated:
         return Response({
                 "detail":"User should log in first to view profiles",
-                "redirect_to": reverse("api:login")
+                "redirect_to": reverse("account_login")
             },
             status=status.HTTP_401_UNAUTHORIZED
         )

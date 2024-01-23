@@ -29,10 +29,10 @@ urlpatterns = [
 
     path('', views.index, name='index'),
     path('accounts/login', views.index, name='frontend_login'),
-    path('CompleteProfile', views.index, name='frontend_complete_profile'),
-    path('Profile', views.index, name='frontend_profile'),
-    path('Home', views.index, name='frontend_home'),
-    path('Createcourse', views.index, name='frontend_create_course'),
+    path('profile/complete-profile', views.index, name='frontend_complete_profile'),
+    path('profile', views.index, name='frontend_profile'),
+    path('home', views.index, name='frontend_home'),
+    path('courses/create-course', views.index, name='frontend_create_course'),
     path('accounts/password-reset-confirm', views.index, name='frontend_password_reset_confirm'),
     
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
