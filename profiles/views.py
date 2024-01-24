@@ -1,4 +1,4 @@
-from django.shortcuts import get_object_or_404, redirect
+from django.shortcuts import get_object_or_404
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.urls import reverse
 
@@ -13,6 +13,16 @@ from accounts.models import User
 from .serializers import *
 
 
+def authenticate_user(user):
+    if not user.is_authenticated:
+        return Response(
+            {
+                "detail":"User should log in first to complete his profile",
+                "redirect_to": reverse("frontend_login")
+            },
+            status=status.HTTP_401_UNAUTHORIZED
+        )
+
 ######################
 # Profile completion #
 ######################
@@ -20,13 +30,8 @@ from .serializers import *
 @ensure_csrf_cookie
 @api_view(['POST'])
 def complete_user_role(request):
-    if not request.user.is_authenticated:
-        return Response({
-                "detail":"User should log in first to complete his profile",
-                "redirect_to": reverse("account_login")
-            },
-            status=status.HTTP_401_UNAUTHORIZED
-        )
+    authenticated = authenticate_user(request.user)
+    if authenticated: return authenticated
     
     serializer = UserRoleSerializer(data=request.data)
     if serializer.is_valid(raise_exception=True):
@@ -39,22 +44,21 @@ def complete_user_role(request):
 @ensure_csrf_cookie
 @api_view(['GET', 'POST'])
 def complete_profile(request):
-    if not request.user.is_authenticated:
-        return Response({
-                "detail":"User should log in first to complete his profile",
-                "redirect_to": reverse("account_login")
-            },
-            status=status.HTTP_401_UNAUTHORIZED
-        )
+    authenticated = authenticate_user(request.user)
+    if authenticated: return authenticated
     if request.user.user_role is None:
-        return Response({
+        return Response(
+            {
                 "detail":"User should have a role to complete his profile",
                 "redirect_to": reverse("profiles:complete_user_role")
             },
             status=status.HTTP_401_UNAUTHORIZED
         )
     if profile_is_completed(request.user):
-        return Response({"detail": "The user's profile has been already completed"}, status=status.HTTP_403_FORBIDDEN)
+        return Response(
+            {"detail": "The user's profile has been already completed"},
+            status=status.HTTP_403_FORBIDDEN
+        )
     
     if request.method == 'GET':
         all_fields = [f.name for f in User._meta.get_fields()]
@@ -84,13 +88,8 @@ def complete_profile(request):
 
 @api_view(['GET'])
 def view_profile(request, username=None):
-    if not request.user.is_authenticated:
-        return Response({
-                "detail":"User should log in first to view profiles",
-                "redirect_to": reverse("account_login")
-            },
-            status=status.HTTP_401_UNAUTHORIZED
-        )
+    authenticated = authenticate_user(request.user)
+    if authenticated: return authenticated
     if not profile_is_completed(request.user):
         role = request.user.user_role
         return Response({

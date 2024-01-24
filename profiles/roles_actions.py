@@ -2,6 +2,7 @@
 Contains functions for the actions that are different between user roles.
 """
 
+from django.urls import reverse
 from rest_framework.response import Response
 from .serializers import *
 from eduAcademy.views_checks import *
@@ -24,12 +25,12 @@ def teacher_complete_profile(request):
         personal_photo = data['personal_photo'],
         national_ID_photo = data['national_ID_photo'],
     )
-    TeachRequest.objects.create(teacher=teacher).save()
+    TeachRequest.objects.create(teacher=teacher)
     return Response({
             "detail":"Teacher completed profile successfully",
             "user_role":request.user.user_role.role,
             "username":request.user.username,
-            "redirect_to":"/Profile"
+            "redirect_to": reverse("frontend_profile")
         }
     )
 
@@ -52,7 +53,7 @@ def student_complete_profile(request):
             "detail":"Student completed profile successfully",
             "user_role":request.user.user_role.role,
             "username":request.user.username,
-            "redirect_to":"/Profile"
+            "redirect_to": reverse("frontend_profile")
         }
     )
 
@@ -74,7 +75,7 @@ def assistant_complete_profile(request):
             "detail":"Assistant completed profile successfully",
             "user_role":request.user.user_role.role,
             "username":request.user.username,
-            "redirect_to":"/Profile"
+            "redirect_to": reverse("frontend_profile")
         }
     )
 
