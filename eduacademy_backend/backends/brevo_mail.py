@@ -35,6 +35,7 @@ class EmailBackend(BaseEmailBackend):
             "link": link,
         }
 
+        to_return = None
         for key, value in self.template_mapper.items():
             if key in subject:
                 to_return = (value, params)
@@ -46,7 +47,9 @@ class EmailBackend(BaseEmailBackend):
             return 0
         
         for email in email_messages:
-            template_id, params = self.map_params_to_subject(email)
+            try: template_id, params = self.map_params_to_subject(email)
+            except: return {"message": "No Emails were sent."}
+            
             send_smtp_email = sib_api_v3_sdk.SendSmtpEmail(
                 to=[{'email': r} for r in email.recipients()],
                 sender=self.sender,
