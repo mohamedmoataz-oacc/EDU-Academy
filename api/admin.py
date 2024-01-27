@@ -3,9 +3,6 @@ from .models import *
 
 admin.site.register(Notification)
 admin.site.register(TeacherBalanceTransaction)
-admin.site.register(Badge)
-admin.site.register(BadgeEarning)
-admin.site.register(Teaching)
 admin.site.register(TeacherRating)
 admin.site.register(AssistanceRequest)
 admin.site.register(AssistantRating)
